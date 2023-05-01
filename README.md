@@ -1,12 +1,14 @@
+# Informações do Trabalho de Dissertação: 
+
 Esse é um Repositório dos scripts utilizados na dissertação apresentada ao Programa de Pós-graduação do Departamento de Ciência Política da Universidade de São Paulo como requisito parcial para a obtenção do título de Mestre em Ciência Política.
 
-Autora: Thais Fernandes Pereira
+**Autora**: Thais Fernandes Pereira
 
-Título: Política de Isenção de Tarifa no Transporte Público de Governos Locais
+**Título**: Política de Isenção de Tarifa no Transporte Público de Governos Locais
 
-Orientador: Prof. Dr. Jonathan Peter Philips
+**Orientador**: Prof. Dr. Jonathan Peter Philips
 
-Linguagem: R
+**Linguagem**: R
 
 # Resumo da dissertação:
 
