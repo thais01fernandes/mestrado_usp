@@ -2,11 +2,150 @@
 title: Exploratory Analysis of Municipalities in Brazil that have adopted a Fare Free
   Public Transport
 author: "Thais Pereira"
-date: "2023-05-01"
-output: html_document
+date: "`r format(Sys.Date(), format='%d/%m/%Y')`"
+output:
+  theme: flatly
+  df_print: paged
+  highlight: tango
+  html_document:
+    toc: true
+    toc_float: true
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+
+(knitr::opts_chunk$set(
+	echo = FALSE,
+	error = FALSE,
+	message = FALSE,
+	warning = FALSE
+)
+) 
 ```
+
+```{css}
+
+@import url('https://fonts.googleapis.com/css2?family=Lora:wght@500&display=swap');
+
+h1.title{ 
+    font-family: 'Lora', serif;
+    color: #bf7d70
+    font-size: 30px;
+    text-align: center;
+    font-weight: bold;
+}
+
+h4.author{ 
+    font-family: 'Lora', serif;
+    color: #bf7d70;
+    font-size: 20px;
+    text-align: center;
+    font-weight: bold;
+}
+
+h4.date{ 
+    font-family: 'Lora', serif;
+    color: #bf7d70;
+    font-size: 12px;
+    text-align: center;
+    font-weight: bold;
+}
+
+p{
+  font-family: 'Lora', serif;
+  text-align: justify;
+  font-size: 13px
+}
+
+
+h2 {
+  font-family: 'Lora', serif;
+  font-size: 15px;
+  text-align: justify;
+}
+
+
+.btn {
+    border-width: 0 0px 0px 0px;
+    font-weight: normal;
+    text-transform: ;
+}
+.btn-default {
+    color: #2ecc71;
+    background-color: #ffffff;
+    border-color: #ffffff;
+}
+
+
+h1, .h1, h2, .h2, h3, .h3 , h4, .h4, h5, .h5, h6, .h6, h7, .h7, h8, .h8 {
+    margin-top: 40px;
+}
+
+
+```
+
+
+```{r Pacotes}
+
+
+library("tidyverse")
+library("kableExtra")
+library("knitr")
+library("tidylog")
+library("readxl")
+library("geobr")
+library("sf")
+library("wesanderson")
+library("ggplot2")
+library("stringr")
+library ("abjData")
+library("extrafont")
+library("lubridate")
+library("transformr")
+library("reactable")
+library("rnaturalearth")
+library("rgeos")
+library("plotly")
+library("ggrepel")
+library('googlesheets4')
+library("leaflet")
+library('ggthemes')
+library('rmdformats')
+
+
+```
+
+
+
+```{r baixando arquivos}
+
+## Cidades com tarfa zero em maio de 2023
+
+ffpt_cities <- read_sheet(ss = "https://docs.google.com/spreadsheets/d/1UnKXflAf5RVRMhCL-FuroTsPZBy7am3qAmD5j_hXc3g/edit#gid=0", sheet = 1)
+
+## PIB 2020 - IBGE
+
+file2 <- "https://raw.githubusercontent.com/thais01fernandes/C-Users-Thais.Pereira-Documents-pessoal-mestrado-An-lise-Mestrado/main/PIB%20dos%20Munic%C3%ADpios%20-%20base%20de%20dados%202010-2018.csv"
+munic_pib <- read_delim(file2, delim = ";", 
+                         locale = locale(encoding='latin1'))
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
