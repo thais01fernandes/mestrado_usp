@@ -16,7 +16,7 @@ Este trabalho de mestrado é uma análise exploratória a respeito da adoção d
 
 # Bases de dados utilizadas: 
 
-1. [PIB Municipal 2020](https://www.ibge.gov.br/estatisticas/economicas/contas-nacionais/9088-produto-interno-bruto-dos-municipios.html?=&t=resultados)
+1. [PIB Municipal - IBGE, 2020](https://www.ibge.gov.br/estatisticas/economicas/contas-nacionais/9088-produto-interno-bruto-dos-municipios.html?=&t=resultados)
 
 2. [População Municipal estimativa - IBGE, 2021](https://www.ibge.gov.br/estatisticas/sociais/populacao/9103-estimativas-de-populacao.html?=&t=downloads)
 
@@ -28,7 +28,7 @@ Este trabalho de mestrado é uma análise exploratória a respeito da adoção d
 
 6. [Plano de mobilidade urbana - Levantamento conduzido pela SEMOB, última atualização 22/jan/2020](https://antigo.mdr.gov.br/index.php?option=com_content&view=article&id=4398:levantamen)
 
-7. [Índice de vulnerabilidade econômica,  IPEA - 2010](http://ivs.ipea.gov.br/index.php/pt/planilha)
+7. [Índice de vulnerabilidade econômica,  IPEA, 2010](http://ivs.ipea.gov.br/index.php/pt/planilha)
 
 8. [Informações Básicas Municipais - IBGE, 2020](https://www.ibge.gov.br/estatisticas/sociais/saude/10586-pesquisa-de-informacoes-basicas-municipais.html?=&t=downloads)
 
