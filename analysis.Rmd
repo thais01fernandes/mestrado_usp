@@ -4,12 +4,10 @@ title: Exploratory Analysis of Municipalities in Brazil that have adopted a Fare
 author: "Thais Pereira"
 date: "`r format(Sys.Date(), format='%d/%m/%Y')`"
 output:
-  theme: flatly
-  df_print: paged
-  highlight: tango
   html_document:
-    toc: true
-    toc_float: true
+    toc: yes
+    toc_float: yes
+  df_print: default
 ---
 
 ```{r setup, include=FALSE}
@@ -29,10 +27,16 @@ output:
 
 h1.title{ 
     font-family: 'Lora', serif;
-    color: #bf7d70
+    color: #bf7d70;
     font-size: 30px;
     text-align: center;
     font-weight: bold;
+}
+
+h2 {
+  font-family: 'Lora', serif;
+  font-size: 15px;
+  text-align: justify;
 }
 
 h4.author{ 
@@ -56,14 +60,6 @@ p{
   text-align: justify;
   font-size: 13px
 }
-
-
-h2 {
-  font-family: 'Lora', serif;
-  font-size: 15px;
-  text-align: justify;
-}
-
 
 .btn {
     border-width: 0 0px 0px 0px;
@@ -125,6 +121,7 @@ banco_completo <- read_delim(file1, delim = ",",
 
 ```
 
+
 ## 1. Tabela com dados a respeio dos municípios que implementaram a política até março de 2023
 
 ```{r Tabela inicial, fig.align = 'center', out.width = "60%"}
@@ -133,15 +130,29 @@ banco_completo <- read_delim(file1, delim = ",",
 # tabela com reactable: 
   
   options(scipen=999)
-  banco_completo_5  %>% 
+  banco_completo  %>% 
   filter(tarifa_zero == "sim") %>% 
-  select(uf, nome_muni, classe_pop, 
-         Pib_Municipal_2018, renda_percapta_media, pct_pobres, prosperidade_social,  
-         taxa_atividade_18_anos_ou_mais, taxa_urbanizacao, area_territorial, densidade_demografica, ocup_desl, taxa_pop_vulneravel_retorna_diariamente_trabalho, 
-         indice_gini, indice_theil, idhm_class, idhm_e_class, idhm_r_class, idhm_l_class, ivs_class, ivs_infra_urbana_class, ivs_cap_class, ivs_renda_trab_class) %>% 
+  select(nome_da_uf, 
+         nome_do_municipio, 
+         classe_pop, 
+         produto_interno_bruto_a_precos_correntes_r_1_000,
+         produto_interno_bruto_per_capita_a_precos_correntes_r_1_00, 
+         pmpob, prosperidade_social,  
+         taxa_urbanizacao, 
+         ar_mun_2022, 
+         densidade_demografica, 
+         gini, 
+         theil, 
+         idhm_class, 
+         idhm_e_class, 
+         idhm_r_class, 
+         idhm_l_class, 
+         ivs_class, 
+         ivs_infra_urbana_class, 
+         ivs_cap_class, 
+         ivs_renda_trab_class) %>% 
   mutate_if(is.character, str_to_title) %>% 
-  mutate(pct_pobres = pct_pobres/100, taxa_atividade_18_anos_ou_mais = taxa_atividade_18_anos_ou_mais/100,
-         ocup_desl = ocup_desl/100) %>% 
+  mutate(pmpob = pmpob/100) %>% 
   reactable(
       defaultPageSize = 5,
       searchable = TRUE,
@@ -150,22 +161,18 @@ banco_completo <- read_delim(file1, delim = ",",
       showPageSizeOptions = TRUE,
       defaultColDef = colDef(
       align = "center",
-      headerStyle = list(background = "#f7f7f8")),
+      headerStyle = list(background = "#d5cabd")),
       columns = list(
-      uf = colDef("Federative Unit", minWidth = 105, align = "center"),
-      nome_muni = colDef("City", minWidth = 120, align = "center"),
+      nome_da_uf = colDef("Federative Unit", minWidth = 105, align = "center"),
+      nome_do_municipio = colDef("City", minWidth = 120, align = "center"),
       classe_pop = colDef("Population Class",  minWidth = 120, align = "center"),
-      Pib_Municipal_2018 = colDef("GDP per Capta" , format = colFormat(prefix = "R$ ", separators = TRUE), minWidth = 120),
-      renda_percapta_media = colDef("Average Per Capta Income" , format = colFormat(prefix = "R$ ", separators = TRUE), minWidth = 150),
+      produto_interno_bruto_a_precos_correntes_r_1_000 = colDef("GDP" , format = colFormat(prefix = "R$ ", separators = TRUE), minWidth = 120),
+      produto_interno_bruto_per_capita_a_precos_correntes_r_1_00 = colDef("GDP Per Capta Income" , format = colFormat(prefix = "R$ ", separators = TRUE), minWidth = 150),
       prosperidade_social = colDef("Social Prosperity", minWidth = 130),
-      pct_pobres = colDef("% of Poor" ,  format = colFormat(percent = TRUE, digits = 1), minWidth = 120), 
-      taxa_atividade_18_anos_ou_mais = colDef("Economically Active Pouplation (18+)" , format = colFormat(percent = TRUE, digits = 1), minWidth = 200),
+      pmpob = colDef("% of Poor" ,  format = colFormat(percent = TRUE, digits = 1), minWidth = 120), 
       taxa_urbanizacao = colDef("Urbanization Rate" , format = colFormat(percent = TRUE, digits = 1), minWidth = 120),
-      ocup_desl = colDef("% of vulnerable to poverty who spend more than an hour to work" , format = colFormat(percent = TRUE, digits = 1), minWidth = 250),
-      taxa_pop_vulneravel_retorna_diariamente_trabalho = colDef("% of the employed population vulnerable to poverty that return daily from work" , 
-                                                                format = colFormat(percent = TRUE, digits = 1), minWidth = 250), 
-      indice_gini = colDef("Gini" ,  minWidth = 100),
-      indice_theil = colDef("Theil-L" ,  minWidth = 100),
+      gini = colDef("Gini" ,  minWidth = 100),
+      theil = colDef("Theil-L" ,  minWidth = 100),
       idhm_class = colDef("Municipal Human Development Index (MHDI)" ,  minWidth = 150),
       idhm_e_class = colDef("MHDI Education" ,  minWidth = 100),
       idhm_r_class = colDef("MHDI Income" ,  minWidth = 100), 
@@ -174,13 +181,48 @@ banco_completo <- read_delim(file1, delim = ",",
       ivs_infra_urbana_class = colDef("SVI Urban Infrastructure" , minWidth = 150), 
       ivs_cap_class = colDef("SVI Human Capital" , minWidth = 150), 
       ivs_renda_trab_class = colDef("SVI Income and Work" , minWidth = 150), 
-      area_territorial = colDef("Territorial Area" , format = colFormat(suffix = " km²", separators = TRUE), minWidth = 150),
+      ar_mun_2022 = colDef("Territorial Area" , format = colFormat(suffix = " km²", separators = TRUE), minWidth = 150),
       densidade_demografica = colDef("Demographic Density" , format = colFormat(suffix = " hab/km²", separators = TRUE, digits = 3), minWidth = 150),
       pageSizeOptions = c(5,10,15,20,25,30), bordered = TRUE, striped = FALSE, highlight = TRUE))
      
 ```
 
+## 2. Localização dos municípios
 
+```{r Download GEObr, include=FALSE}
+
+# Download dos Estados e Municípios: 
+
+muni_geobr_1 <- read_municipality(code_muni="all", year=2018)
+
+geo_ufs <- read_state(code_state = 'all', year = 2018)
+
+# Estados: 
+
+  munic_isencao_tarifa_uf <- banco_completo %>% 
+  select(cod_uf,tarifa_zero) %>% 
+  distinct() %>% 
+  rename(code_state=cod_uf)
+
+  geo_ufs_2 <- geo_ufs  %>% 
+  left_join(munic_isencao_tarifa_uf, by = c("code_state")) %>% 
+  replace(is.na("tarifa_zero"), "não")
+
+# municipios: 
+
+  munic_isencao_tarifa_muni <- banco_completo %>% 
+  rename(code_muni= CodMun) %>% 
+  select(code_muni,tarifa_zero) %>% 
+  distinct()
+
+  muni_geobr_3 <- muni_geobr_1 %>% 
+  left_join(munic_isencao_tarifa_muni, by = c("code_muni")) %>% 
+  replace(is.na("tarifa_zero"), "não") %>% 
+  st_centroid() %>% 
+  filter(tarifa_zero == "sim") %>% 
+  rename (Municipio = name_muni)
+
+```
 
 
 

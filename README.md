@@ -49,7 +49,7 @@ Este trabalho de mestrado é uma análise exploratória a respeito da adoção d
 
 ## Artigo publicado com resultados parciais da pesquisa, em parceria com pesquisadores da Universidade de Bruxelas, do Cosmopolis Centre for Urban Research:
 
-Fernandes Pereira, T., Vermander, M., & Kębłowski, W. (2023). Motivações e características das políticas de Tarifa Zero em municípios brasileiros selecionados. Journal of Sustainable Urban Mobility, 3(1), 122–138. https://doi.org/10.53613/josum.2023.v3.010 
+Fernandes Pereira, T., Vermander, M., & Kębłowski, W. (2023). 122Motivations and characteristics of FFPT policies in selected Brazilian municipalities. Journal of Sustainable Urban Mobility, 3(1), 122–138. https://doi.org/10.53613/josum.2023.v3.010 
 
 
 
