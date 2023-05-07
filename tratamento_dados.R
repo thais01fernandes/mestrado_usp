@@ -13,7 +13,7 @@ library ("abjData")
 # PIB - Os dados do PIB municipal foram baixandos do site do IBGE e são referentes a 2020
 # endereço: https://www.ibge.gov.br/estatisticas/economicas/contas-nacionais/9088-produto-interno-bruto-dos-municipios.html?=&t=resultados
 
-file1 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/data/pib_2020"
+file1 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/pib_2020"
 munic_pib <- read_delim(file1, delim = ",", 
                         locale = locale(encoding='latin1'))
 
@@ -22,20 +22,19 @@ munic_pib <- read_delim(file1, delim = ",",
 # endereço: https://www.ibge.gov.br/estatisticas/sociais/populacao/9103-estimativas-de-populacao.html?=&t=downloads
 
 
-file2 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/data/pop_munic"
+file2 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/pop_munic"
 munic_pop <- read_delim(file2, delim = ",", 
                         locale = locale(encoding='latin1'))
 
 # Cidades com tarifa zero - levantamento produzido por pesquisadores do tema
 
-ffpt_cities <- read_sheet(ss = "https://docs.google.com/spreadsheets/d/1UnKXflAf5RVRMhCL-FuroTsPZBy7am3qAmD5j_hXc3g/edit#gid=0", sheet = 1) %>% 
-  rename(CodMun = Cod_IBGE)
+ffpt_cities <- read_sheet(ss = "https://docs.google.com/spreadsheets/d/1UnKXflAf5RVRMhCL-FuroTsPZBy7am3qAmD5j_hXc3g/edit#gid=0", sheet = 1) 
 
 
 # Base de dados sobre transporte público - IBGE, 2020
 # endereço: https://www.ibge.gov.br/estatisticas/sociais/saude/10586-pesquisa-de-informacoes-basicas-municipais.html?=&t=downloads
 
-file3 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/data/munic_transporte"
+file3 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/munic_transporte"
 munic_transporte <- read_delim(file3, delim = ",", 
                                locale = locale(encoding='latin1')) 
 
@@ -45,14 +44,14 @@ munic_transporte <- read_delim(file3, delim = ",",
 # Área Territorial dos municípios, IBGE, 2022
 # endereço: https://www.ibge.gov.br/geociencias/organizacao-do-territorio/estrutura-territorial/15761-areas-dos-municipios.html?=&t=downloads
 
-file4 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/data/area_territorial"
+file4 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/area_territorial"
 area_territorial <- read_delim(file4, delim = ",",
                                locale = locale(encoding='latin1')) 
 
 # Plano de mobilidade urbana - Levantamento conduzido pela SEMOB - última atualização 22/jan/2020
 # endereço: https://antigo.mdr.gov.br/index.php?option=com_content&view=article&id=4398:levantamen
 
-file5 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/data/plano_mob"
+file5 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/plano_mob"
 plano_mob <- read_delim(file5, delim = ",",
                         locale = locale(encoding='latin1'))
 
@@ -60,7 +59,7 @@ plano_mob <- read_delim(file5, delim = ",",
 # Endereço: http://ivs.ipea.gov.br/index.php/pt/planilha 
 
 
-file6 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/data/indice_ipea"
+file6 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/indice_ipea"
   indice_ipea <- read_delim(file6, delim = ",",
                           locale = locale(encoding='latin1'))
 
@@ -107,7 +106,7 @@ banco_completo <-
                                     "Crianças menores de 5 anos", "Outros_2", "Toda a população", "Nenhum passageiro", "Frota de ônibus municipais adaptada para pessoas com deficiência ou mobilidade reduzida", "Piso baixo", 
                                     "Piso alto com acesso realizado por plataforma de embarque/desembarque", "Piso alto equipado com plataforma elevatória veicular", "Não sabe", "Transporte coletivo por ônibus intermunicipal", 
                                     "Este transporte coletivo atende também ao deslocamento entre bairros, distritos, localidades dentro do município", "Ciclovia no município","Bicicletário no município"))) %>% 
-    left_join(ffpt_cities, by = c("cod_munic" = "CodMun")) %>% 
+    left_join(ffpt_cities, by = c("cod_munic" = "Cod_IBGE")) %>% 
     mutate(tarifa_zero = case_when(tarifa_zero == "sim" ~ "sim", 
                                  TRUE ~ "não")) %>% 
     left_join(pnud_muni, by = c("cod_munic" =  "codmun7")) %>% 
