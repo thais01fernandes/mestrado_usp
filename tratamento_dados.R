@@ -111,7 +111,7 @@ banco_completo <-
                                  TRUE ~ "não")) %>% 
     left_join(pnud_muni, by = c("cod_munic" =  "codmun7")) %>% 
     filter(ano == 2010) %>% 
-    select(cod_munic, regiao, `Caracterização do órgão gestor`, `Escolaridade do(a) titular do órgão gestor`, `Plano Municipal de Transporte - existência`, 
+    select(cod_munic, tarifa_zero, ano_implementacao, regiao, `Caracterização do órgão gestor`, `Escolaridade do(a) titular do órgão gestor`, `Plano Municipal de Transporte - existência`, 
            `O município realizou alguma Conferência Municipal de Transporte nos últimos 4 anos`, `Conselho Municipal de Transporte - existência`,
            `Fundo Municipal de Transporte - existência`, `Transporte coletivo por ônibus intramunicipal`, `Transporte coletivo por ônibus intermunicipal`, 
            `Este transporte coletivo atende também ao deslocamento entre bairros, distritos, localidades dentro do município`, `Serviço prestado diretamente pela prefeitura`, 
@@ -132,7 +132,7 @@ banco_completo <-
     left_join(munic_pib, by = c("cod_munic" = "codigo_do_municipio")) %>% 
     left_join(plano_mob, by = c("cod_munic" = "código do município - IBGE")) %>% 
     mutate(regiao = gsub(pattern = "1 -|2 -|3 -|4 -|5 -",replacement = "", regiao)) %>% clean_names() %>%
-    select(-35, -39:-40, -43:-44, -55:-60, -62:-99, -105:-108, -115) %>%
+    select(-37, -41:-42, -45:-46, -57:-62, -64:-101, -107:-110, -117) %>% 
     mutate(idhm_class = case_when(idhm > 0 & idhm <= 0.499 ~ "Very Low", 
                                 idhm  >= 0.500 & idhm <= 0.599 ~ "Low", 
                                 idhm  >= 0.600 & idhm <= 0.699 ~ "Medium", 
@@ -168,10 +168,14 @@ banco_completo <-
     mutate(ivs_cap_class = case_when(ivs_capital_humano >= 0 & ivs_capital_humano <= 0.200 ~ "Very Low", 
                                      ivs_capital_humano  >= 0.201 & ivs_capital_humano <= 0.300 ~ "Low", 
                                      ivs_capital_humano  >= 0.301 & ivs_capital_humano <= 0.400 ~ "Medium", 
-                                     ivs_capital_humano  >= 0.401 ~"High", TRUE ~ "indice_ivs")) 
+                                     ivs_capital_humano  >= 0.401 ~"High", TRUE ~ "indice_ivs")) %>% 
+  mutate(taxa_urbanizacao = pesourb/pesotot) %>% 
+  mutate(densidade_demografica = populacao_estimada/ar_mun_2022)
   
 
 # Salvando o banco completo no Github pra ser usado no arquivo Rmarckdown que será usado para o relatório:
 
 write.csv(banco_completo, "banco_completo")
+
+
 

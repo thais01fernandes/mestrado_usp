@@ -116,30 +116,69 @@ library('rmdformats')
 ```
 
 
+```{r Baixando os dados}
 
-```{r baixando arquivos}
-
-## Cidades com tarfa zero em maio de 2023
-
-ffpt_cities <- read_sheet(ss = "https://docs.google.com/spreadsheets/d/1UnKXflAf5RVRMhCL-FuroTsPZBy7am3qAmD5j_hXc3g/edit#gid=0", sheet = 1)
-
-## PIB 2020 - IBGE
-
-file2 <- "https://raw.githubusercontent.com/thais01fernandes/C-Users-Thais.Pereira-Documents-pessoal-mestrado-An-lise-Mestrado/main/PIB%20dos%20Munic%C3%ADpios%20-%20base%20de%20dados%202010-2018.csv"
-munic_pib <- read_delim(file2, delim = ";", 
-                         locale = locale(encoding='latin1'))
+file1 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/banco_completo"
+banco_completo <- read_delim(file1, delim = ",", 
+                        locale = locale(encoding='latin1')) %>% select(-1)
 
 
 ```
 
+## 1. Tabela com dados a respeio dos municípios que implementaram a política até março de 2023
 
+```{r Tabela inicial, fig.align = 'center', out.width = "60%"}
 
-
-
-
-
-
-
+# tabela de apresentação dos municípios estudados 
+# tabela com reactable: 
+  
+  options(scipen=999)
+  banco_completo_5  %>% 
+  filter(tarifa_zero == "sim") %>% 
+  select(uf, nome_muni, classe_pop, 
+         Pib_Municipal_2018, renda_percapta_media, pct_pobres, prosperidade_social,  
+         taxa_atividade_18_anos_ou_mais, taxa_urbanizacao, area_territorial, densidade_demografica, ocup_desl, taxa_pop_vulneravel_retorna_diariamente_trabalho, 
+         indice_gini, indice_theil, idhm_class, idhm_e_class, idhm_r_class, idhm_l_class, ivs_class, ivs_infra_urbana_class, ivs_cap_class, ivs_renda_trab_class) %>% 
+  mutate_if(is.character, str_to_title) %>% 
+  mutate(pct_pobres = pct_pobres/100, taxa_atividade_18_anos_ou_mais = taxa_atividade_18_anos_ou_mais/100,
+         ocup_desl = ocup_desl/100) %>% 
+  reactable(
+      defaultPageSize = 5,
+      searchable = TRUE,
+      outlined = FALSE, 
+      showPageInfo = TRUE, 
+      showPageSizeOptions = TRUE,
+      defaultColDef = colDef(
+      align = "center",
+      headerStyle = list(background = "#f7f7f8")),
+      columns = list(
+      uf = colDef("Federative Unit", minWidth = 105, align = "center"),
+      nome_muni = colDef("City", minWidth = 120, align = "center"),
+      classe_pop = colDef("Population Class",  minWidth = 120, align = "center"),
+      Pib_Municipal_2018 = colDef("GDP per Capta" , format = colFormat(prefix = "R$ ", separators = TRUE), minWidth = 120),
+      renda_percapta_media = colDef("Average Per Capta Income" , format = colFormat(prefix = "R$ ", separators = TRUE), minWidth = 150),
+      prosperidade_social = colDef("Social Prosperity", minWidth = 130),
+      pct_pobres = colDef("% of Poor" ,  format = colFormat(percent = TRUE, digits = 1), minWidth = 120), 
+      taxa_atividade_18_anos_ou_mais = colDef("Economically Active Pouplation (18+)" , format = colFormat(percent = TRUE, digits = 1), minWidth = 200),
+      taxa_urbanizacao = colDef("Urbanization Rate" , format = colFormat(percent = TRUE, digits = 1), minWidth = 120),
+      ocup_desl = colDef("% of vulnerable to poverty who spend more than an hour to work" , format = colFormat(percent = TRUE, digits = 1), minWidth = 250),
+      taxa_pop_vulneravel_retorna_diariamente_trabalho = colDef("% of the employed population vulnerable to poverty that return daily from work" , 
+                                                                format = colFormat(percent = TRUE, digits = 1), minWidth = 250), 
+      indice_gini = colDef("Gini" ,  minWidth = 100),
+      indice_theil = colDef("Theil-L" ,  minWidth = 100),
+      idhm_class = colDef("Municipal Human Development Index (MHDI)" ,  minWidth = 150),
+      idhm_e_class = colDef("MHDI Education" ,  minWidth = 100),
+      idhm_r_class = colDef("MHDI Income" ,  minWidth = 100), 
+      idhm_l_class  = colDef("MHDI Longevidade" , minWidth = 120),
+      ivs_class = colDef("Social Vulnerability Index (SVI)" , minWidth = 150), 
+      ivs_infra_urbana_class = colDef("SVI Urban Infrastructure" , minWidth = 150), 
+      ivs_cap_class = colDef("SVI Human Capital" , minWidth = 150), 
+      ivs_renda_trab_class = colDef("SVI Income and Work" , minWidth = 150), 
+      area_territorial = colDef("Territorial Area" , format = colFormat(suffix = " km²", separators = TRUE), minWidth = 150),
+      densidade_demografica = colDef("Demographic Density" , format = colFormat(suffix = " hab/km²", separators = TRUE, digits = 3), minWidth = 150),
+      pageSizeOptions = c(5,10,15,20,25,30), bordered = TRUE, striped = FALSE, highlight = TRUE))
+     
+```
 
 
 
