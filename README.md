@@ -37,14 +37,15 @@ Este trabalho de mestrado é uma análise exploratória a respeito da adoção d
 
 ## Municípios Entrevistados para Análise Qualitativa: 
 
-*Caeté (MG)
-*Morungaba (MG)
-*Caucaia (CE)
-*Rio Branco do Sul (RS)
-*Ivaiporã (SP)
-*Maricá (RJ)
-*Vargem Grande Paulista (SP)
-*Itapeva (SP)
+|Cidade|Estado|
+|---|---|
+|Caeté| MG |
+|Caucaia| CE |
+|Rio Branco do Sul| RS|
+|Ivaiporã| SP|
+|Maricá| RJ |
+|Vargem Grande Paulista| SP |
+|Itapeva| SP |
 
 ## Artigo publicado com resultados parciais da pesquisa, em parceria com pesquisadores da Universidade de Bruxelas, do Cosmopolis Centre for Urban Research:
 
