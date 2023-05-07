@@ -16,23 +16,23 @@ Este trabalho de mestrado é uma análise exploratória a respeito da adoção d
 
 # Bases de dados utilizadas: 
 
-## 1. [PIB Municipal 2020](https://www.ibge.gov.br/estatisticas/economicas/contas-nacionais/9088-produto-interno-bruto-dos-municipios.html?=&t=resultados)
+1. [PIB Municipal 2020](https://www.ibge.gov.br/estatisticas/economicas/contas-nacionais/9088-produto-interno-bruto-dos-municipios.html?=&t=resultados)
 
-## 2. [População Municipal estimativa - IBGE, 2021](https://www.ibge.gov.br/estatisticas/sociais/populacao/9103-estimativas-de-populacao.html?=&t=downloads)
+2. [População Municipal estimativa - IBGE, 2021](https://www.ibge.gov.br/estatisticas/sociais/populacao/9103-estimativas-de-populacao.html?=&t=downloads)
 
-## 3. [Cidades com tarifa zero - levantamento produzido por pesquisadores do tema](https://docs.google.com/spreadsheets/d/1UnKXflAf5RVRMhCL-FuroTsPZBy7am3qAmD5j_hXc3g/edit#gid=0)
+3. [Cidades com tarifa zero - levantamento produzido por pesquisadores do tema](https://docs.google.com/spreadsheets/d/1UnKXflAf5RVRMhCL-FuroTsPZBy7am3qAmD5j_hXc3g/edit#gid=0)
 
-## 4. [Base de dados sobre transporte público - IBGE, 2020](https://www.ibge.gov.br/estatisticas/sociais/saude/10586-pesquisa-de-informacoes-basicas-municipais.html?=&t=downloads) 
+4. [Base de dados sobre transporte público - IBGE, 2020](https://www.ibge.gov.br/estatisticas/sociais/saude/10586-pesquisa-de-informacoes-basicas-municipais.html?=&t=downloads) 
 
-## 5. [Área Territorial dos municípios, IBGE, 2022](https://www.ibge.gov.br/geociencias/organizacao-do-territorio/estrutura-territorial/15761-areas-dos-municipios.html?=&t=downloads)
+5. [Área Territorial dos municípios, IBGE, 2022](https://www.ibge.gov.br/geociencias/organizacao-do-territorio/estrutura-territorial/15761-areas-dos-municipios.html?=&t=downloads)
 
-## 6. [Plano de mobilidade urbana - Levantamento conduzido pela SEMOB, última atualização 22/jan/2020](https://antigo.mdr.gov.br/index.php?option=com_content&view=article&id=4398:levantamen)
+6. [Plano de mobilidade urbana - Levantamento conduzido pela SEMOB, última atualização 22/jan/2020](https://antigo.mdr.gov.br/index.php?option=com_content&view=article&id=4398:levantamen)
 
-## 7. [Índice de vulnerabilidade econômica,  IPEA - 2010](http://ivs.ipea.gov.br/index.php/pt/planilha)
+7. [Índice de vulnerabilidade econômica,  IPEA - 2010](http://ivs.ipea.gov.br/index.php/pt/planilha)
 
-## 8. [Informações Básicas Municipais - IBGE, 2020](https://www.ibge.gov.br/estatisticas/sociais/saude/10586-pesquisa-de-informacoes-basicas-municipais.html?=&t=downloads)
+8. [Informações Básicas Municipais - IBGE, 2020](https://www.ibge.gov.br/estatisticas/sociais/saude/10586-pesquisa-de-informacoes-basicas-municipais.html?=&t=downloads)
 
-## 9. [abjData - Compilado de Dados PNUD, 2010](https://abjur.github.io/abjData/)
+9. [abjData - Compilado de Dados PNUD, 2010](https://abjur.github.io/abjData/)
 
 
 
