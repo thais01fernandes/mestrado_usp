@@ -57,9 +57,9 @@ plano_mob <- read_delim(file5, delim = ",",
 # Endereço: http://ivs.ipea.gov.br/index.php/pt/planilha 
 
 
-file6 <- "https://raw.githubusercontent.com/thais01fernandes/Analises-Mestrado/main/dados_ipea.csv"
-indice_ipea <- read_delim(file6, delim = ",")
-
+file6 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/data/indice_ipea"
+indice_ipea <- read_delim(file6, delim = ",",
+                          locale = locale(encoding='latin1'))
 
 # Organização da Base Munic Transporte e juntando com a base de cidades com tarifa zero
 
@@ -86,8 +86,8 @@ names(munic_transporte) <- c("CodMun", "nome_muni", "regiao", "Caracterização 
                              "Piso alto com acesso realizado por plataforma de embarque/desembarque", "Piso alto equipado com plataforma elevatória veicular", "Não sabe", "Transporte coletivo por ônibus intermunicipal", 
                              "Este transporte coletivo atende também ao deslocamento entre bairros, distritos, localidades dentro do município", "Ciclovia no município","Bicicletário no município")
 
-munic_transporte_2 <- munic_transporte %>% View()
-  select(CodMun, `Caracterização do órgão gestor`, `Escolaridade do(a) titular do órgão gestor`, `Plano Municipal de Transporte - existência`, 
+munic_transporte_2 <- munic_transporte %>% 
+  select(CodMun, regiao, `Caracterização do órgão gestor`, `Escolaridade do(a) titular do órgão gestor`, `Plano Municipal de Transporte - existência`, 
          `O município realizou alguma Conferência Municipal de Transporte nos últimos 4 anos`, `Conselho Municipal de Transporte - existência`,
          `Fundo Municipal de Transporte - existência`, `Transporte coletivo por ônibus intramunicipal`, `Transporte coletivo por ônibus intermunicipal`, 
          `Este transporte coletivo atende também ao deslocamento entre bairros, distritos, localidades dentro do município`, `Serviço prestado diretamente pela prefeitura`, 
@@ -97,35 +97,57 @@ munic_transporte_2 <- munic_transporte %>% View()
   mutate(tarifa_zero = case_when(tarifa_zero == "sim" ~ "sim", 
                                  TRUE ~ "não")) 
 
-
-  
 # Todos os seguintes dados foram baixados do pacote R "abjData": Índice de Desenvolvimento Humano Municipal (IDHM), índice de Gini e índice de Theil, IVS municipal, Índice de prosperidade social, População Urbana e Rural, Renda per Capta, % de pobres
 # Os dados do índice de vulnerabilidade econômica foram retirados do site do ipea: http://ivs.ipea.gov.br/index.php/pt/planilha 
 # Todos esses dados são referentes ao censo IBGE 2010
 # Endereço: https://abjur.github.io/abjData/
+
+# Tratamento na base de população 
+
+munic_pop_2 <-
+area_territorial %>% 
+  select(CD_UF, NM_UF_SIGLA) %>% 
+  rename(uf = NM_UF_SIGLA) %>% 
+  left_join(munic_pop, by = "uf") %>% 
+  select(CD_UF, cod_munic, nome_do_municipio, uf, populacao_estimada) %>% 
+  unite("cod_munic", c(CD_UF,cod_munic), sep="") %>% 
+  distinct(cod_munic, .keep_all = TRUE) 
   
-  munic_transporte_3 <- pnud_muni %>% 
+  
+  munic_transporte_3 <- pnud_muni %>%
+    mutate(codmun7 = as.character(codmun7)) %>% 
     filter(ano == 2010) %>% 
     select(uf, ufn, municipio, codmun6,codmun7, rdpc, pesourb, pesorur, pesotot, theil, gini, idhm_r, idhm_l, idhm_e, idhm,	
            pmpob) %>% 
-    rename(CodMun = codmun7) %>% 
-    left_join(munic_pop, by = "CodMun") %>% 
-    select(-`COD UF`, -UF, -`NOME MUNIC`) %>% 
-    mutate(`CLASSE POP` = gsub(pattern = "1 -|2 -|3 -|4 -|5 -|6 -|7 -",replacement = "",`CLASSE POP`)) %>% 
-    mutate(REGIAO = gsub(pattern = "1 -|2 -|3 -|4 -|5 -",replacement = "", REGIAO)) %>% 
-    mutate(`CLASSE POP` = gsub("Até 5000","Up to 5.000", `CLASSE POP`)) %>% 
-    mutate(`CLASSE POP` = gsub("5001 até 10000","5.000 up to 10.000", `CLASSE POP`)) %>%  
-    mutate(`CLASSE POP` = gsub("10001 até 20000","10.000 up to 20.000", `CLASSE POP`)) %>% 
-    mutate(`CLASSE POP` = gsub("20001 até 50000","20.000 up to 50.000", `CLASSE POP`)) %>% 
-    mutate(`CLASSE POP` = gsub("50001 até 100000","50.000 up to 100.000", `CLASSE POP`)) %>% 
-    mutate(`CLASSE POP` = gsub("100001 até 500000","100.000 up to 500.000",`CLASSE POP`)) %>%
-    mutate(`CLASSE POP` = gsub("Maior que 500000","Greater than 500.000", `CLASSE POP`)) %>% 
-    left_join(indice_ipea, by = c("CodMun" = "Município")) %>% 
-    left_join(area_territorial, by = c("CodMun")) %>% 
-    left_join(munic_transporte_2, by = c("CodMun")) 
+    rename(cod_munic = codmun7) %>% 
+    left_join(munic_pop_2, by = "cod_munic") %>% 
+    select(-nome_do_municipio, -uf.y) %>% 
+    mutate(populacao_estimada = as.double(populacao_estimada)) %>% 
+    mutate(classe_pop = case_when(populacao_estimada <= 5000 ~ "Up to 5.000", 
+                                  populacao_estimada >= 5001 & populacao_estimada <= 10000 ~ "5.000 up to 10.000",
+                                  populacao_estimada >= 10001 & populacao_estimada <= 20000 ~ "10.000 up to 20.000", 
+                                  populacao_estimada >= 20001 & populacao_estimada <= 50000 ~ "20.000 up to 50.000", 
+                                  populacao_estimada >= 50001 & populacao_estimada <= 100000 ~ "50.000 up to 100.000", 
+                                  populacao_estimada >= 100001 & populacao_estimada <= 500000 ~ "100.000 up to 500.000",
+                                  populacao_estimada >= 500001 ~ "Greater than 500.000", TRUE ~ "NA")) %>% 
+    mutate(cod_munic = as.double(cod_munic)) %>% 
+    left_join(indice_ipea, by = c("cod_munic" = "Município")) %>% 
+    left_join(area_territorial, by = c("cod_munic" = "CD_MUN")) %>% 
+    left_join(munic_transporte_2, by = c("cod_munic" = "CodMun")) %>%
+    left_join(munic_pib, by = c("cod_munic" = "codigo_do_municipio")) %>% 
+    left_join(plano_mob, by = c("cod_munic" = "código do município - IBGE")) %>% 
+    mutate(regiao = gsub(pattern = "1 -|2 -|3 -|4 -|5 -",replacement = "", regiao)) %>% 
+    
+    
   
-
-
+    
+    # ver o que vai precisar filtrar: 
+    
+    select(-...1.y, -...1.x, -uf.x, -ufn, -municipio, - NM_UF, -CD_UF, -NM_UF_SIGLA, -NM_MUN, -ID, -Cidade, -Estado, -Pop) %>% 
+    select(-56, -57, -58, -59, -60, -61, -62, -63, -64, -65, -66, -67, -68, -69, -70, -71, -72, -73, -74, 
+           -75, -76, -77, -78, -79, -80, -81, -82, -83, -94, -85, -86, -87, -88, -89, -90, -91, -92, -93) %>% 
+    clean_names() %>% names()
+    
 
 
 
