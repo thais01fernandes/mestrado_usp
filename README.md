@@ -46,6 +46,7 @@ Este trabalho de mestrado é uma análise exploratória a respeito da adoção d
 |Maricá| RJ |
 |Vargem Grande Paulista| SP |
 |Itapeva| SP |
+|Morungaba| SP |
 
 ## Artigo publicado com resultados parciais da pesquisa, em parceria com pesquisadores da Universidade de Bruxelas, do Cosmopolis Centre for Urban Research:
 
