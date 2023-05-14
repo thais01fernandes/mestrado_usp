@@ -167,8 +167,11 @@ banco_completo <- read_delim(file1, delim = ",",
 
 ```
 
+## **Abstract**
 
-Descriptive Analysis
+This report analyse data from 65 Brazilian cities that have adopted the full fare exemption on public transport, more popularly known in Brazil as the "Tarifa Zero", a term that will be used in this report to refer to this policy. For the selection of cases, three criteria were used: i. The policy was implemented in all transport networks in the city; ii. It is available to all users and; iii. it was not discontinued until December 2022. We intend to present an exploratory analysis of public data about the studied municipalities and characterize them by checking if there is homogeneity in their economic and social characteristics, in addition to comparing them with all others that have not adopted the policy, with the objective to understand the differences and disparities between the two groups of cities, based on Political Science Teories, in order to undertand why this policy was implemented. 
+
+## **Descriptive Analysis**
 
 ## 1. General data about the municipalities
 
@@ -316,7 +319,6 @@ tarifa_zero <- ffpt_muni_5 %>% filter(tarifa_zero == "sim") %>% select(latitude,
 
 ```
 
-
 ## 5. Population Class
 
 
@@ -360,6 +362,7 @@ tarifa_zero <- ffpt_muni_5 %>% filter(tarifa_zero == "sim") %>% select(latitude,
 
 
 ```
+
 
 ## 4. Year of Implementation
 
@@ -405,7 +408,132 @@ ggplot() +
 
 ---
 
-Exploratory Analysis
+## **Exploratory Analysis**
+
+
+## 1.Análise da Teoria do Eleitor Mediano
+
+
+1° Premissa: "Quanto maior a desigualdade, maior a exigência por serviços públicos e consequente aumento do gasto público. Portanto, cidades com tarifa zero devem ser mais desiguais do que cidades sem essa política." 
+
+Para verificar se essa premissa de fato pode nos ajudar a explicar a tarifa zero, vejamos primeiro o Gini e o Theil-L, ambos são índices de desigualdade amplamente utilizados, medem o grau de concentração de renda em determinado grupo e variam de 0 a 1, sendo 0 uma situação de completa igualdade e 1 uma situação de completa desigualdade, nesse caso estão usando dados do censo de 2010.
+
+```{r Indice de Gini e Theil media geral}
+
+# Indíce de Gini médias
+
+media_indice_gini_tf <- banco_completo %>% 
+  filter(tarifa_zero == "sim") %>% 
+  summarize(median(gini)) %>% 
+  round(digits = 2) %>% 
+  pull()
+
+media_indice_gini_geral <- banco_completo %>% 
+  filter(tarifa_zero != "sim") %>% 
+  summarize(median(gini, na.rm = TRUE)) %>% 
+  round(digits = 2) %>% 
+  pull()
+
+# Indíce de  Theil 
+
+media_indice_theil_tf <- banco_completo %>% 
+  filter(tarifa_zero == "sim") %>% 
+  summarize(median(theil)) %>% 
+  round(digits = 2) %>% 
+  pull()
+
+media_indice_theil_geral <- banco_completo %>% 
+  filter(tarifa_zero != "sim") %>% 
+  summarize(median(theil, na.rm = TRUE)) %>% 
+  round(digits = 2) %>% 
+  pull()
+
+
+
+```
+
+
+degree of income concentration in a given group and range from 0 to 1,
+0 being a situation of complete equality, and 1 being a situation of complete
+inequality, in addition both are using data from the 2010 census.
+The general median of the Gini index in the studied cities is
+ `r media_indice_gini_tf`, while for municipalities without a Zero Tariff it is
+`r media_indice_gini_geral`. There is only a small difference in the averages. And the same is true for the
+Theil-L index, where the median in the first group is `r media_indice_theil_tf`, while in the second group it is
+ `r media_indice_theil_geral`, but similarly the municipalities with Tarifa Zero present values that indicate less social inequality.
+Below we can see the distribution graph of the values of the two indexes for all
+the municipalities with a Tarifa Zero: 
+
+
+```{r Gráfico GINI e Theil 1, fig.align = 'center', out.width = "60%", dpi=300}
+
+banco_completo %>% 
+  pivot_longer(cols = c("gini", "theil")) %>%
+  mutate(name = case_when(
+    name == "gini" ~ "Gini",
+    name == "theil" ~ "Theil-L")) %>% 
+    ggplot() +
+    geom_boxplot(aes(x = tarifa_zero, y = value, fill = tarifa_zero), colour="black", alpha = 0.6) + 
+  facet_wrap(~name) +
+  theme_light() +
+  xlab("") +
+  ylab("") +
+  scale_fill_manual(name = "Tarifa Zero?", values = c("#00688b", "#954182"), labels = c("Não", "Sim"))+ 
+  theme_light() + 
+    theme(plot.title = element_text(family = "serif", size = 12, face = "bold", hjust = 0.5, colour = "black"),
+          strip.background = element_rect(colour = "white", fill = "#b9a6b3"),
+    strip.text.x = element_text(colour = "black", hjust = 0.5, family = "serif", face = "bold"),
+    text = element_text(family = "serif", size = 13),
+    axis.text.x=element_blank(),
+    axis.text.y=element_text(size = 10, family = "serif"),
+    legend.position = "bottom")
+
+
+
+```
+Tabela Separandos os valores por UF: 
+
+
+```{r}
+
+  ffpt <- banco_completo %>% 
+  filter(tarifa_zero == "sim") %>% 
+  select(regiao, gini, theil) %>% 
+  group_by(regiao) %>% 
+  summarise(media_gini_tf = median(gini), media_theil_tf = median(theil))
+
+
+# munic sem ffpt:
+
+  banco_completo %>% 
+  filter(tarifa_zero == "não") %>% 
+  select(regiao, gini, theil) %>% 
+  group_by(regiao) %>% 
+  summarise(media_gini_geral = median(gini), media_theil_geral = median(theil)) %>% 
+  left_join(ffpt, by = "regiao") %>% 
+  select(regiao, media_gini_geral, media_gini_tf, media_theil_geral, media_theil_tf) %>% 
+      reactable(
+      fullWidth = F,
+      defaultColDef = colDef(
+      align = "center"),
+      columns = list(
+      regiao = colDef("Região", minWidth = 130),
+      media_gini_tf = colDef("Cidades com Tarifa Zero", minWidth = 130),
+      media_gini_geral = colDef("Cidades sem Tarifa Zero", minWidth = 130),
+      media_theil_tf = colDef("Cidades com Tarifa Zero", minWidth = 130),
+     media_theil_geral = colDef("Cidades sem Tarifa Zero", minWidth = 130)),
+    columnGroups = list(
+    colGroup(name = "Índice de Gini", columns = c("media_gini_tf", "media_gini_geral" )),
+    colGroup(name = "Índice de Theil", columns = c("media_theil_geral", "media_theil_tf"))))
+
+
+```
+
+
+2° Premissa: "Quanto menor a riqueza medida através do PIB, maior a demanda por políticas redistributivas. Dessa forma, cidades com tarifa zero dispõem de menor PIB per capita do que cidades sem essa política."
+
+Para essa análise fizemos um corte comparando apenas as cidades com até 150 mil reais de PIB per capta, tanto com tarifa zero quanto sem tarifa zero. Isso não significa retirar muitas cidades da base de dados já que 99,45% das cidades sem tarifa zero (e com menos de 300 mil habitantes) estão dentro desse valor de PIB per capita, no caso das cidades com tarifa zero, isso representa 96,4% das cidades, essa foi uma forma de retirar os valores discrepantes da análise e torná-la mais evidente. 
+
 
 
 
