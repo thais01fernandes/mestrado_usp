@@ -23,6 +23,11 @@ output:
 
 ```{css}
 
+  .title {
+  margin-top: 1.50em !important;
+  margin-bottom: 0.75em;
+}
+
 @import url('https://fonts.googleapis.com/css2?family=Lora:wght@500&display=swap');
 
 h1.title{ 
@@ -61,21 +66,62 @@ p{
   font-size: 13px
 }
 
-.btn {
-    border-width: 0 0px 0px 0px;
-    font-weight: normal;
-    text-transform: ;
-}
-.btn-default {
-    color: #2ecc71;
-    background-color: #ffffff;
-    border-color: #ffffff;
-}
-
-
 h1, .h1, h2, .h2, h3, .h3 , h4, .h4, h5, .h5, h6, .h6, h7, .h7, h8, .h8 {
     margin-top: 40px;
 }
+
+
+/*------------Table of Contents (TOC)----------- */
+
+/*----------TOC Sticky Fix---------*/
+
+
+.main-container > .row:first-child > div:first-child.col-xs-12.col-sm-4.col-md-3{
+  position: sticky;
+  top: 10px;
+}
+
+#TOC{ 
+  position: initial;
+  width: 100%;
+  font-size: 14px;
+}
+
+/*----------TOC Sticky Adjustment---------*/
+
+.tocify ul, .tocify li { /* Increases spacing between TOC headers*/
+    line-height: 20px !important;
+}
+
+.tocify ul {
+  border-right: solid 1px #eee; /* Thin right border on TOC list */
+}
+
+
+
+/* Active TOC links*/
+
+.list-group-item.active, 
+.list-group-item.active:hover{
+  color:"White";
+  background-color: #677381;
+  font-family: 'Lora', serif;
+  border-color: #ccc;
+  font-size: 14px;
+  text-align: left;
+}
+
+/* Hovered TOC links*/
+
+.list-group-item:hover { 
+  color: "White";
+  background-color: #677381;
+  font-family: 'Lora', serif;
+  border: none;
+  font-size: 14px;
+  text-align: left;
+}
+
 
 
 ```
@@ -122,7 +168,9 @@ banco_completo <- read_delim(file1, delim = ",",
 ```
 
 
-## 1. Tabela com dados a respeio dos municípios que implementaram a política até março de 2023
+Descriptive Analysis
+
+## 1. General data about the municipalities
 
 ```{r Tabela inicial, fig.align = 'center', out.width = "60%"}
 
@@ -161,14 +209,14 @@ banco_completo <- read_delim(file1, delim = ",",
       showPageSizeOptions = TRUE,
       defaultColDef = colDef(
       align = "center",
-      headerStyle = list(background = "#d5cabd")),
+      headerStyle = list(background = "#c18d83")),
       columns = list(
       nome_da_uf = colDef("Federative Unit", minWidth = 105, align = "center"),
       nome_do_municipio = colDef("City", minWidth = 120, align = "center"),
       classe_pop = colDef("Population Class",  minWidth = 120, align = "center"),
       produto_interno_bruto_a_precos_correntes_r_1_000 = colDef("GDP" , format = colFormat(prefix = "R$ ", separators = TRUE), minWidth = 120),
       produto_interno_bruto_per_capita_a_precos_correntes_r_1_00 = colDef("GDP Per Capta Income" , format = colFormat(prefix = "R$ ", separators = TRUE), minWidth = 150),
-      prosperidade_social = colDef("Social Prosperity", minWidth = 130),
+      prosperidade_social = colDef("Social Prosperity", minWidth = 150),
       pmpob = colDef("% of Poor" ,  format = colFormat(percent = TRUE, digits = 1), minWidth = 120), 
       taxa_urbanizacao = colDef("Urbanization Rate" , format = colFormat(percent = TRUE, digits = 1), minWidth = 120),
       gini = colDef("Gini" ,  minWidth = 100),
@@ -187,42 +235,180 @@ banco_completo <- read_delim(file1, delim = ",",
      
 ```
 
-## 2. Localização dos municípios
+## 2.  Localization of municipalities
 
-```{r Download GEObr, include=FALSE}
+```{r leaflet map,  fig.align = 'center', out.width = "90%"}
 
-# Download dos Estados e Municípios: 
+# Primeiro precisamos dos dados de latitude e longitude das cidades analisadas. 
+urlfile <- "https://raw.githubusercontent.com/kelvins/Municipios-Brasileiros/master/csv/municipios.csv"
+cities_lat_lng <- read.csv(urlfile,encoding = "UTF-8")
+# é necessário se certificar que o código de cada cidade estará em formato de texto, para o que a função left_join funcione. 
+cities_lat_lng$codigo_ibge <- as.double(cities_lat_lng$codigo_ibge)
 
-muni_geobr_1 <- read_municipality(code_muni="all", year=2018)
+ffpt_muni_5 <- banco_completo %>% rename(codigo_ibge = cod_munic) %>% 
+  left_join(cities_lat_lng, by = "codigo_ibge")
 
-geo_ufs <- read_state(code_state = 'all', year = 2018)
+tarifa_zero <- ffpt_muni_5 %>% filter(tarifa_zero == "sim") %>% select(latitude, longitude, nome_do_municipio)
 
-# Estados: 
+  leaflet(tarifa_zero) %>%
+  addTiles() %>% 
+  addMarkers(popup= tarifa_zero$nome_do_municipio)
 
-  munic_isencao_tarifa_uf <- banco_completo %>% 
-  select(cod_uf,tarifa_zero) %>% 
-  distinct() %>% 
-  rename(code_state=cod_uf)
 
-  geo_ufs_2 <- geo_ufs  %>% 
-  left_join(munic_isencao_tarifa_uf, by = c("code_state")) %>% 
-  replace(is.na("tarifa_zero"), "não")
-
-# municipios: 
-
-  munic_isencao_tarifa_muni <- banco_completo %>% 
-  rename(code_muni= CodMun) %>% 
-  select(code_muni,tarifa_zero) %>% 
-  distinct()
-
-  muni_geobr_3 <- muni_geobr_1 %>% 
-  left_join(munic_isencao_tarifa_muni, by = c("code_muni")) %>% 
-  replace(is.na("tarifa_zero"), "não") %>% 
-  st_centroid() %>% 
-  filter(tarifa_zero == "sim") %>% 
-  rename (Municipio = name_muni)
 
 ```
+
+
+## 3. Region of municipalities
+
+
+```{r Região dos Municípios,fig.align = 'center', out.width = "50%"}
+
+# Tabela com a Região dos Municípios
+
+  banco_completo  %>% 
+  filter(tarifa_zero == "sim") %>% 
+  mutate(regiao = trimws(regiao)) %>% 
+  group_by(regiao) %>%
+  tally() %>% 
+  reactable(
+      outlined = F, 
+      fullWidth = F,
+      bordered = T,
+      striped = F,
+      defaultColDef = colDef(
+      align = "center",
+      headerStyle = list(background = "#c18d83")),
+      columns = list(
+      regiao = colDef("Region", minWidth = 120, align = "center"),
+      n = colDef("Municipalities with Tarifa Zero", minWidth = 300, align = "center")))
+
+
+
+
+```
+
+##  4. State of municipalities
+
+```{r UF dos municípios, fig.align = 'center', out.width = "50%"}
+
+# Tabela com a UF dos municípios 
+
+  banco_completo  %>% 
+  filter(tarifa_zero == "sim") %>% 
+  mutate(nome_da_uf = trimws(nome_da_uf)) %>% 
+  group_by(nome_da_uf) %>%
+  tally() %>%
+  arrange(-n) %>% 
+  reactable(
+      outlined = F, 
+      fullWidth = F,
+      bordered = TRUE,
+      striped = F,
+     defaultColDef = colDef(
+      align = "center",
+      headerStyle = list(background = "#c18d83")),
+      columns = list(
+      nome_da_uf = colDef("Federative Unit", minWidth = 150, align = "center"),
+      n = colDef("Municipalities with Tarifa Zero", minWidth = 300, align = "center")))
+
+
+
+```
+
+
+## 5. Population Class
+
+
+```{r}
+
+  banco_completo %>% 
+  mutate(classe_pop = factor(classe_pop, levels = c("Up to 5.000", 
+                                                    "5.000 up to 10.000", 
+                                                    "10.000 up to 20.000", 
+                                                    "20.000 up to 50.000",
+                                                    "50.000 up to 100.000", 
+                                                    "100.000 up to 500.000", 
+                                                    "Greater than 500.000", ordered = TRUE))) %>% 
+  group_by(tarifa_zero, classe_pop) %>% 
+  tally() %>% 
+  mutate(pct = n/sum(n)) %>% 
+  mutate(classe_pop = trimws(classe_pop)) %>% 
+  mutate_if(is.numeric, ~replace(., is.na(.), 0)) %>% 
+  filter(!is.na(classe_pop)) %>% 
+  mutate(tarifa_zero = case_when(tarifa_zero == "sim" ~ "Municípios com Tarifa Zero", 
+                                 tarifa_zero == "não"~ "Municípios sem Tarifa Zero", TRUE ~ tarifa_zero)) %>% 
+  ggplot() +
+  geom_col(aes(x = reorder(classe_pop, pct), y =  pct, fill = tarifa_zero), width = 1,colour="white", alpha = 0.6) + 
+  xlab("") +
+  ylab("") +
+  ggtitle( "") +
+  facet_wrap(~tarifa_zero)+
+  scale_fill_manual(name = "", values = c("gray22", "gray22"), labels = element_blank()) + 
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  geom_label(aes(x = classe_pop, y = pct, group = tarifa_zero, label = scales::percent(pct, accuracy = 2)), 
+             position = position_identity(),family = "serif", size = 4, colour = "white", fill = "#c18d83", face = "bold")+
+  theme_minimal() + 
+    theme(plot.title = element_text(family = "serif", size = 12, face = "bold", hjust = 0.5, colour = "black"),
+          strip.background = element_rect(colour = "white", fill = "#c18d83"),
+    strip.text.x = element_text(colour = "White", hjust = 0.5, family = "serif", face = "bold"),
+    text = element_text(family = "Lora", size = 13),
+    axis.text.y=element_text(size = 10, family = "Lora"),
+    axis.text.x=element_blank(),
+    legend.position="none")+
+    coord_flip() 
+
+
+```
+
+## 4. Year of Implementation
+
+
+```{r}
+
+banco_completo %>% 
+filter(tarifa_zero == "sim") %>% 
+mutate(ano_implementacao_classe = case_when(ano_implementacao <= 1998 ~ "Until 2000s", 
+                                  ano_implementacao >= 2001 & ano_implementacao  <= 2009 ~ "Between 2001 and 2009",
+                                  ano_implementacao >= 2010 & ano_implementacao <= 2015 ~  "Between 2010 and 2015", 
+                                  ano_implementacao >= 2016 & ano_implementacao <= 2020 ~ "Between 2016 and 2020", 
+                                  ano_implementacao >= 2020  ~ "After 2021", 
+                                  TRUE ~ "NA")) %>% 
+mutate(ano_implementacao_classe = factor(ano_implementacao_classe, levels = c("Until 2000s", 
+                                                                          "Between 2001 and 2009", 
+                                                                          "Between 2010 and 2015", 
+                                                                          "Between 2016 and 2020",
+                                                                          "After 2021", ordered = T))) %>% 
+group_by(ano_implementacao_classe) %>% 
+tally() %>% 
+mutate(pct = n/sum(n)) %>% 
+ggplot() +
+  geom_col(aes(x = reorder(ano_implementacao_classe, pct), y =  pct), width = 1,colour="white", alpha = 0.6) + 
+  xlab("") +
+  ylab("") +
+  ggtitle( "") +
+  scale_fill_manual(name = "", values = c("gray22", "gray22"), labels = element_blank()) + 
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  geom_label(aes(x = ano_implementacao_classe, y = pct, label = scales::percent(pct, accuracy = 2)), 
+             position = position_identity(),family = "serif", size = 4, colour = "white", fill = "#c18d83", face = "bold")+
+  theme_minimal() + 
+    theme(plot.title = element_text(family = "serif", size = 12, face = "bold", hjust = 0.5, colour = "black"),
+          strip.background = element_rect(colour = "white", fill = "#c18d83"),
+    strip.text.x = element_text(colour = "White", hjust = 0.5, family = "serif", face = "bold"),
+    text = element_text(family = "Lora", size = 13),
+    axis.text.y=element_text(size = 10, family = "Lora"),
+    axis.text.x=element_blank(),
+    legend.position="none")+
+    coord_flip() 
+
+```
+
+---
+
+Exploratory Analysis
+
+
+
 
 
 
