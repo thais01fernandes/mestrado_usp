@@ -104,7 +104,7 @@ h1, .h1, h2, .h2, h3, .h3 , h4, .h4, h5, .h5, h6, .h6, h7, .h7, h8, .h8 {
 .list-group-item.active, 
 .list-group-item.active:hover{
   color:"White";
-  background-color: #677381;
+  background-color: #a7ae9c;
   font-family: 'Lora', serif;
   border-color: #ccc;
   font-size: 14px;
@@ -115,7 +115,7 @@ h1, .h1, h2, .h2, h3, .h3 , h4, .h4, h5, .h5, h6, .h6, h7, .h7, h8, .h8 {
 
 .list-group-item:hover { 
   color: "White";
-  background-color: #677381;
+  background-color: #a7ae9c;
   font-family: 'Lora', serif;
   border: none;
   font-size: 14px;
