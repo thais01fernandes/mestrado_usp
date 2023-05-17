@@ -213,7 +213,7 @@ muni_geobr_3 <- muni_geobr_1 %>%
 
 # Salvando o banco completo no Github pra ser usado no arquivo Rmarckdown que será usado para o relatório:
 
-write.csv(banco_completo, "geo_ufs_2")
+write.csv(geo_ufs_2, "geo_ufs_2")
 
-write.csv(banco_completo, "muni_geobr_3")
+write.csv(muni_geobr_3, "muni_geobr_3")
 
