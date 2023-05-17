@@ -217,7 +217,7 @@ This report analyse data from 65 Brazilian cities that have adopted the full far
       nome_da_uf = colDef("Federative Unit", minWidth = 105, align = "center"),
       nome_do_municipio = colDef("City", minWidth = 120, align = "center"),
       classe_pop = colDef("Population Class",  minWidth = 120, align = "center"),
-      produto_interno_bruto_a_precos_correntes_r_1_000 = colDef("GDP" , format = colFormat(prefix = "R$ ", separators = TRUE), minWidth = 120),
+      produto_interno_bruto_a_precos_correntes_r_1_000 = colDef("GDP" , format = colFormat(prefix = "R$ ", separators = TRUE), minWidth = 160),
       produto_interno_bruto_per_capita_a_precos_correntes_r_1_00 = colDef("GDP Per Capta Income" , format = colFormat(prefix = "R$ ", separators = TRUE), minWidth = 150),
       prosperidade_social = colDef("Social Prosperity", minWidth = 150),
       pmpob = colDef("% of Poor" ,  format = colFormat(percent = TRUE, digits = 1), minWidth = 120), 
@@ -239,6 +239,67 @@ This report analyse data from 65 Brazilian cities that have adopted the full far
 ```
 
 ## 2.  Localization of municipalities
+
+The map below shows us the location of the cities, the points
+represent the municipalities: 
+
+```{r Download GEObr, include=FALSE}
+
+# Download dos Estados e Municípios: 
+
+muni_geobr_1 <- read_municipality(code_muni="all", year=2018)
+
+geo_ufs <- read_state(code_state = 'all', year = 2018)
+
+# Estados: 
+
+  munic_isencao_tarifa_uf <- banco_completo %>% 
+  select(uf_x,tarifa_zero) %>% 
+  distinct() %>% 
+  rename(code_state=uf_x)
+
+  geo_ufs_2 <- geo_ufs  %>% 
+  left_join(munic_isencao_tarifa_uf, by = c("code_state")) %>% 
+  replace(is.na("tarifa_zero"), "não")
+
+# municipios: 
+
+  munic_isencao_tarifa_muni <- banco_completo  %>% 
+  rename(code_muni= cod_munic) %>% 
+  select(code_muni,tarifa_zero) %>% 
+  distinct()
+
+  muni_geobr_3 <- muni_geobr_1 %>% 
+  left_join(munic_isencao_tarifa_muni, by = c("code_muni")) %>% 
+  replace(is.na("tarifa_zero"), "não") %>% 
+  st_centroid() %>% 
+  filter(tarifa_zero == "sim") %>% 
+  rename (Municipio = name_muni)
+  
+
+```
+
+
+```{r Mapa dos municipios, fig.align = 'center', out.width = "90%"}
+
+
+# gráfico de mapa colocando os municípios dentro de seus respectivos estados:
+
+geo_ufs_2 %>%
+st_as_sf(coords=c("geom")) %>%
+ggplot() +
+geom_sf(aes(geometry = geom,
+           fill = as.character(tarifa_zero)), color = "white") +
+geom_sf(data=muni_geobr_3) +
+theme_light()+
+scale_fill_manual(name = "Tarifa Zero?", values = c("#c57d4b", "#7e9563"), labels = c("Não", "Sim")) +
+theme(legend.text = element_text(family = "serif", size = 12, hjust = 0.5, colour = "black"), 
+      legend.title = element_text(family = "serif", size = 12, hjust = 0.5, colour = "black"))
+
+
+```
+
+The map below shows us more detailed the location of the cities
 
 ```{r leaflet map,  fig.align = 'center', out.width = "90%"}
 
@@ -414,7 +475,7 @@ ggplot() +
 ## 1.Análise da Teoria do Eleitor Mediano
 
 
-1° Premissa: "Quanto maior a desigualdade, maior a exigência por serviços públicos e consequente aumento do gasto público. Portanto, cidades com tarifa zero devem ser mais desiguais do que cidades sem essa política." 
+**1° Premissa:** "Quanto maior a desigualdade, maior a exigência por serviços públicos e consequente aumento do gasto público. Portanto, cidades com tarifa zero devem ser mais desiguais do que cidades sem essa política." 
 
 Para verificar se essa premissa de fato pode nos ajudar a explicar a tarifa zero, vejamos primeiro o Gini e o Theil-L, ambos são índices de desigualdade amplamente utilizados, medem o grau de concentração de renda em determinado grupo e variam de 0 a 1, sendo 0 uma situação de completa igualdade e 1 uma situação de completa desigualdade, nesse caso estão usando dados do censo de 2010.
 
@@ -465,7 +526,7 @@ Below we can see the distribution graph of the values of the two indexes for all
 the municipalities with a Tarifa Zero: 
 
 
-```{r Gráfico GINI e Theil 1, fig.align = 'center', out.width = "60%", dpi=300}
+```{r Gráfico GINI e Theil 1, fig.align = 'center', out.width = "70%", dpi=300}
 
 banco_completo %>% 
   pivot_longer(cols = c("gini", "theil")) %>%
@@ -473,17 +534,18 @@ banco_completo %>%
     name == "gini" ~ "Gini",
     name == "theil" ~ "Theil-L")) %>% 
     ggplot() +
-    geom_boxplot(aes(x = tarifa_zero, y = value, fill = tarifa_zero), colour="black", alpha = 0.6) + 
+    geom_boxplot(aes(x = tarifa_zero, y = value, fill = tarifa_zero), colour="black", alpha = 0.9) + 
   facet_wrap(~name) +
   theme_light() +
+  ggtitle("Boxplot do Índice de Gini e de Theil") +
   xlab("") +
   ylab("") +
-  scale_fill_manual(name = "Tarifa Zero?", values = c("#00688b", "#954182"), labels = c("Não", "Sim"))+ 
+  scale_fill_manual(name = "Tarifa Zero?", values = c("#c57d4b", "#7e9563"), labels = c("Não", "Sim"))+ 
   theme_light() + 
     theme(plot.title = element_text(family = "serif", size = 12, face = "bold", hjust = 0.5, colour = "black"),
-          strip.background = element_rect(colour = "white", fill = "#b9a6b3"),
-    strip.text.x = element_text(colour = "black", hjust = 0.5, family = "serif", face = "bold"),
-    text = element_text(family = "serif", size = 13),
+          strip.background = element_rect(colour = "white", fill = "#579296"),
+  strip.text.x = element_text(colour = "White", hjust = 0.5, family = "serif", face = "bold"),
+    text = element_text(family = "serif", size = 14),
     axis.text.x=element_blank(),
     axis.text.y=element_text(size = 10, family = "serif"),
     legend.position = "bottom")
@@ -491,6 +553,7 @@ banco_completo %>%
 
 
 ```
+
 Tabela Separandos os valores por UF: 
 
 
@@ -530,9 +593,54 @@ Tabela Separandos os valores por UF:
 ```
 
 
-2° Premissa: "Quanto menor a riqueza medida através do PIB, maior a demanda por políticas redistributivas. Dessa forma, cidades com tarifa zero dispõem de menor PIB per capita do que cidades sem essa política."
+**2° Premissa:** "Quanto menor a riqueza medida através do PIB, maior a demanda por políticas redistributivas. Dessa forma, cidades com tarifa zero dispõem de menor PIB per capita do que cidades sem essa política."
 
 Para essa análise fizemos um corte comparando apenas as cidades com até 150 mil reais de PIB per capta, tanto com tarifa zero quanto sem tarifa zero. Isso não significa retirar muitas cidades da base de dados já que 99,45% das cidades sem tarifa zero (e com menos de 300 mil habitantes) estão dentro desse valor de PIB per capita, no caso das cidades com tarifa zero, isso representa 96,4% das cidades, essa foi uma forma de retirar os valores discrepantes da análise e torná-la mais evidente. 
+
+
+```{r PIB, fig.align = 'center', out.width = "70%", dpi=300}
+
+
+# Gráfico
+
+banco_completo %>% 
+  rename(pib_per_capta = produto_interno_bruto_per_capita_a_precos_correntes_r_1_00) %>% 
+  filter(pib_per_capta < 150000) %>% 
+  ggplot() +
+  geom_boxplot(aes(x = pib_per_capta, fill = tarifa_zero), colour="black", alpha = 0.9) + 
+  theme_light() +
+  xlab("") +
+  ylab("") +
+  ggtitle("Boxplot do PIB per capta") +
+  scale_x_continuous(
+    labels = scales::label_dollar(prefix = "R$ ",
+                                  big.mark = ".")) + 
+  scale_fill_manual(name = "Tarifa Zero?", values = c("#c57d4b", "#7e9563"), labels = c("Não", "Sim"))+ 
+  theme_light() + 
+    theme(plot.title = element_text(family = "serif", size = 12, face = "bold", hjust = 0.5, colour = "black"),
+    text = element_text(family = "serif", size = 14),
+    axis.text.x=element_blank(),
+    axis.text.y=element_text(size = 10, family = "serif"),
+    legend.position = "bottom")+ 
+  coord_flip() 
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
