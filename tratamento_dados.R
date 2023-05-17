@@ -7,6 +7,7 @@ library("readxl")
 library('googlesheets4')
 library("janitor")
 library ("abjData")
+library("geobr")
 
 ## Baixando os dados
 
@@ -177,4 +178,42 @@ banco_completo <-
 
 write.csv(banco_completo, "banco_completo")
 
+# Baixando dados para o mapa com Geobr 
+
+# Download dos Estados e Municípios: 
+
+muni_geobr_1 <- read_municipality(code_muni="all", year=2018)
+
+geo_ufs <- read_state(code_state = 'all', year = 2018)
+
+# Estados: 
+
+munic_isencao_tarifa_uf <- banco_completo %>% 
+  select(uf_x,tarifa_zero) %>% 
+  distinct() %>% 
+  rename(code_state=uf_x)
+
+geo_ufs_2 <- geo_ufs  %>% 
+  left_join(munic_isencao_tarifa_uf, by = c("code_state")) %>% 
+  replace(is.na("tarifa_zero"), "não")
+
+# municipios: 
+
+munic_isencao_tarifa_muni <- banco_completo  %>% 
+  rename(code_muni= cod_munic) %>% 
+  select(code_muni,tarifa_zero) %>% 
+  distinct()
+
+muni_geobr_3 <- muni_geobr_1 %>% 
+  left_join(munic_isencao_tarifa_muni, by = c("code_muni")) %>% 
+  replace(is.na("tarifa_zero"), "não") %>% 
+  st_centroid() %>% 
+  filter(tarifa_zero == "sim") %>% 
+  rename (Municipio = name_muni)
+
+# Salvando o banco completo no Github pra ser usado no arquivo Rmarckdown que será usado para o relatório:
+
+write.csv(banco_completo, "geo_ufs_2")
+
+write.csv(banco_completo, "muni_geobr_3")
 

@@ -5,9 +5,12 @@ author: "Thais Pereira"
 date: "`r format(Sys.Date(), format='%d/%m/%Y')`"
 output:
   html_document:
-    toc: yes
-    toc_float: yes
-  df_print: default
+    includes:
+        before_body: logo-option.html
+        toc: yes
+        toc_float: yes
+        df_print: default
+        code_folding: true
 ---
 
 ```{r setup, include=FALSE}
@@ -120,6 +123,19 @@ h1, .h1, h2, .h2, h3, .h3 , h4, .h4, h5, .h5, h6, .h6, h7, .h7, h8, .h8 {
   border: none;
   font-size: 14px;
   text-align: left;
+}
+
+/*----------LOGO above TOC---------*/
+
+#TOC::before {
+  content: "";
+  display: block;
+  height: 120px;
+  margin: 2em 15px 35px 15px;
+  background-image: url("onibus.png");
+  background-size: contain;
+  background-position: center center;
+  background-repeat: no-repeat;
 }
 
 
