@@ -4,13 +4,13 @@ title: Exploratory Analysis of Municipalities in Brazil that have adopted a Fare
 author: "Thais Pereira"
 date: "`r format(Sys.Date(), format='%d/%m/%Y')`"
 output:
-  html_document:
-    includes:
-        before_body: logo-option.html
-        toc: yes
-        toc_float: yes
-        df_print: default
-        code_folding: true
+    html_document:
+      theme: flatly
+      self-contained: yes
+      toc: yes
+      toc_float: yes
+      css: 
+        - style.css
 ---
 
 ```{r setup, include=FALSE}
@@ -22,124 +22,6 @@ output:
 	warning = FALSE
 )
 ) 
-```
-
-```{css}
-
-  .title {
-  margin-top: 1.50em !important;
-  margin-bottom: 0.75em;
-}
-
-@import url('https://fonts.googleapis.com/css2?family=Lora:wght@500&display=swap');
-
-h1.title{ 
-    font-family: 'Lora', serif;
-    color: #bf7d70;
-    font-size: 30px;
-    text-align: center;
-    font-weight: bold;
-}
-
-h2 {
-  font-family: 'Lora', serif;
-  font-size: 15px;
-  text-align: justify;
-}
-
-h4.author{ 
-    font-family: 'Lora', serif;
-    color: #bf7d70;
-    font-size: 20px;
-    text-align: center;
-    font-weight: bold;
-}
-
-h4.date{ 
-    font-family: 'Lora', serif;
-    color: #bf7d70;
-    font-size: 12px;
-    text-align: center;
-    font-weight: bold;
-}
-
-p{
-  font-family: 'Lora', serif;
-  text-align: justify;
-  font-size: 13px
-}
-
-h1, .h1, h2, .h2, h3, .h3 , h4, .h4, h5, .h5, h6, .h6, h7, .h7, h8, .h8 {
-    margin-top: 40px;
-}
-
-
-/*------------Table of Contents (TOC)----------- */
-
-/*----------TOC Sticky Fix---------*/
-
-
-.main-container > .row:first-child > div:first-child.col-xs-12.col-sm-4.col-md-3{
-  position: sticky;
-  top: 10px;
-}
-
-#TOC{ 
-  position: initial;
-  width: 100%;
-  font-size: 14px;
-}
-
-/*----------TOC Sticky Adjustment---------*/
-
-.tocify ul, .tocify li { /* Increases spacing between TOC headers*/
-    line-height: 20px !important;
-}
-
-.tocify ul {
-  border-right: solid 1px #eee; /* Thin right border on TOC list */
-}
-
-
-
-/* Active TOC links*/
-
-.list-group-item.active, 
-.list-group-item.active:hover{
-  color:"White";
-  background-color: #a7ae9c;
-  font-family: 'Lora', serif;
-  border-color: #ccc;
-  font-size: 14px;
-  text-align: left;
-}
-
-/* Hovered TOC links*/
-
-.list-group-item:hover { 
-  color: "White";
-  background-color: #a7ae9c;
-  font-family: 'Lora', serif;
-  border: none;
-  font-size: 14px;
-  text-align: left;
-}
-
-/*----------LOGO above TOC---------*/
-
-#TOC::before {
-  content: "";
-  display: block;
-  height: 120px;
-  margin: 2em 15px 35px 15px;
-  background-image: url("onibus.png");
-  background-size: contain;
-  background-position: center center;
-  background-repeat: no-repeat;
-}
-
-
-
 ```
 
 
@@ -180,6 +62,14 @@ file1 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/d
 banco_completo <- read_delim(file1, delim = ",", 
                         locale = locale(encoding='latin1')) %>% select(-1)
 
+file2 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/geo_ufs_2"
+geo_ufs_2 <- read_delim(file2, delim = ",", 
+                        locale = locale(encoding='latin1')) 
+
+
+file3 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/muni_geobr_3"
+muni_geobr_3 <- read_delim(file3, delim = ",", 
+                        locale = locale(encoding='latin1'))
 
 ```
 
@@ -259,58 +149,23 @@ This report analyse data from 65 Brazilian cities that have adopted the full far
 The map below shows us the location of the cities, the points
 represent the municipalities: 
 
-```{r Download GEObr, include=FALSE}
-
-# Download dos Estados e Municípios: 
-
-muni_geobr_1 <- read_municipality(code_muni="all", year=2018)
-
-geo_ufs <- read_state(code_state = 'all', year = 2018)
-
-# Estados: 
-
-  munic_isencao_tarifa_uf <- banco_completo %>% 
-  select(uf_x,tarifa_zero) %>% 
-  distinct() %>% 
-  rename(code_state=uf_x)
-
-  geo_ufs_2 <- geo_ufs  %>% 
-  left_join(munic_isencao_tarifa_uf, by = c("code_state")) %>% 
-  replace(is.na("tarifa_zero"), "não")
-
-# municipios: 
-
-  munic_isencao_tarifa_muni <- banco_completo  %>% 
-  rename(code_muni= cod_munic) %>% 
-  select(code_muni,tarifa_zero) %>% 
-  distinct()
-
-  muni_geobr_3 <- muni_geobr_1 %>% 
-  left_join(munic_isencao_tarifa_muni, by = c("code_muni")) %>% 
-  replace(is.na("tarifa_zero"), "não") %>% 
-  st_centroid() %>% 
-  filter(tarifa_zero == "sim") %>% 
-  rename (Municipio = name_muni)
-  
-
-```
-
 
 ```{r Mapa dos municipios, fig.align = 'center', out.width = "90%"}
 
 
-# gráfico de mapa colocando os municípios dentro de seus respectivos estados:
 
-geo_ufs_2 %>%
-st_as_sf(coords=c("geom")) %>%
-ggplot() +
-geom_sf(aes(geometry = geom,
-           fill = as.character(tarifa_zero)), color = "white") +
-geom_sf(data=muni_geobr_3) +
-theme_light()+
-scale_fill_manual(name = "Tarifa Zero?", values = c("#c57d4b", "#7e9563"), labels = c("Não", "Sim")) +
-theme(legend.text = element_text(family = "serif", size = 12, hjust = 0.5, colour = "black"), 
-      legend.title = element_text(family = "serif", size = 12, hjust = 0.5, colour = "black"))
+# gráfico de mapa colocando os municípios dentro de seus respectivos estados:
+# 
+# geo_ufs_2 %>% 
+# st_as_sf(coords=c("geom")) %>%
+# ggplot() +
+# geom_sf(aes(geometry = geom,
+#            fill = as.character(tarifa_zero)), color = "white") +
+# geom_sf(data=muni_geobr_3) +
+# theme_light()+
+# scale_fill_manual(name = "Tarifa Zero?", values = c("#c57d4b", "#7e9563"), labels = c("Não", "Sim")) +
+# theme(legend.text = element_text(family = "serif", size = 12, hjust = 0.5, colour = "black"), 
+#       legend.title = element_text(family = "serif", size = 12, hjust = 0.5, colour = "black"))
 
 
 ```

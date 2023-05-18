@@ -1,0 +1,173 @@
+
+.title {
+  margin-top: 1.50em !important;
+  margin-bottom: 0.75em;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Lora:wght@500&display=swap');
+
+h1.title{ 
+  font-family: 'Lora', serif;
+  color: #bf7d70;
+    font-size: 30px;
+  text-align: center;
+  font-weight: bold;
+}
+
+h2 {
+  font-family: 'Lora', serif;
+  font-size: 15px;
+  text-align: justify;
+}
+
+h4.author{ 
+  font-family: 'Lora', serif;
+  color: #bf7d70;
+    font-size: 20px;
+  text-align: center;
+  font-weight: bold;
+}
+
+h4.date{ 
+  font-family: 'Lora', serif;
+  color: #bf7d70;
+    font-size: 12px;
+  text-align: center;
+  font-weight: bold;
+}
+
+p{
+  font-family: 'Lora', serif;
+  text-align: justify;
+  font-size: 13px
+}
+
+h1, .h1, h2, .h2, h3, .h3 , h4, .h4, h5, .h5, h6, .h6, h7, .h7, h8, .h8 {
+  margin-top: 40px;
+}
+
+
+/*------------Table of Contents (TOC)----------- */
+  
+  /*----------TOC Sticky Fix---------*/
+  
+  
+  .main-container > .row:first-child > div:first-child.col-xs-12.col-sm-4.col-md-3{
+    position: sticky;
+    top: 10px;
+  }
+
+#TOC{ 
+position: initial;
+width: 100%;
+font-size: 14px;
+}
+
+/*----------TOC Sticky Adjustment---------*/
+  
+  .tocify ul, .tocify li { /* Increases spacing between TOC headers*/
+      line-height: 20px !important;
+  }
+
+.tocify ul {
+  border-right: solid 1px #eee; /* Thin right border on TOC list */
+}
+
+
+
+/* Active TOC links*/
+  
+  .list-group-item.active, 
+.list-group-item.active:hover{
+  color:"White";
+  background-color: #a7ae9c;
+    font-family: 'Lora', serif;
+  border-color: #ccc;
+    font-size: 14px;
+  text-align: left;
+}
+
+/* Hovered TOC links*/
+  
+  .list-group-item:hover { 
+    color: "White";
+    background-color: #a7ae9c;
+      font-family: 'Lora', serif;
+    border: none;
+    font-size: 14px;
+    text-align: left;
+  }
+
+/*----------LOGO above TOC---------*/
+  
+  #TOC::before {
+  content: "";
+display: block;
+height: 120px;
+margin: 2em 15px 35px 15px;
+background-image: url("onibus.png");
+background-size: contain;
+background-position: center center;
+background-repeat: no-repeat;
+}
+
+/* NO TOC on mobile */
+  
+  @media screen and (max-width: 767px){
+    
+    .col-xs-12.col-sm-4.col-md-3 {
+      display: none;
+    }
+    
+    .top-text {
+      font-size: 25px;
+    }
+    
+    .bottom-text {
+      font-size: 40px;
+    }
+    
+    
+  }
+
+
+.tocify {
+  position: -webkit-sticky;
+  position: sticky; 
+  top: 120px; /*Controls where TOC stops when sticky */
+    width: 100% !important;
+  border: none;
+}
+
+
+
+/*----------------NAVBAR ---------------*/
+.navbar-default {
+    background-color: #141c25f2;
+}
+
+.navbar-default .navbar-nav>.open>a, 
+.navbar-default .navbar-nav>.active>a, 
+a.dropdown-toggle:hover {
+  background-color: #141c25 !important;
+}
+
+/* Dropdown menu color */
+.navbar-default .dropdown-menu {
+  background-color: #141c25;
+}
+
+/* Dropdown menu hover color */
+  .navbar-default .dropdown-menu>li>a:hover {
+    background-color: #202831f2;
+  }
+
+/* Navbar Links when hovered*/
+.navbar-default .dropdown-menu>.active>a
+.navbar-default .navbar-nav>.active>a:hover, 
+.navbar-default .navbar-nav:hover, 
+.navbar-default .navbar-nav>li>a:hover, 
+a.navbar-brand:hover {
+  color: #ffffffab !important;
+  background-color: #141c25;
+}
