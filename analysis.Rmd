@@ -11,6 +11,9 @@ output:
       toc_float: yes
       css: 
         - style.css
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
 ```{r setup, include=FALSE}
@@ -23,7 +26,6 @@ output:
 )
 ) 
 ```
-
 
 ```{r Pacotes}
 
@@ -51,10 +53,12 @@ library('googlesheets4')
 library("leaflet")
 library('ggthemes')
 library('rmdformats')
+library("janitor")
+# install.packages("PNADcIBGE")
+library(PNADcIBGE)
 
 
 ```
-
 
 ```{r Baixando os dados}
 
@@ -75,7 +79,19 @@ muni_geobr_3 <- read_delim(file3, delim = ",",
 
 ## **Abstract**
 
-This report analyse data from 65 Brazilian cities that have adopted the full fare exemption on public transport, more popularly known in Brazil as the "Tarifa Zero", a term that will be used in this report to refer to this policy. For the selection of cases, three criteria were used: i. The policy was implemented in all transport networks in the city; ii. It is available to all users and; iii. it was not discontinued until December 2022. We intend to present an exploratory analysis of public data about the studied municipalities and characterize them by checking if there is homogeneity in their economic and social characteristics, in addition to comparing them with all others that have not adopted the policy, with the objective to understand the differences and disparities between the two groups of cities, based on Political Science Teories, in order to undertand why this policy was implemented. 
+This report analyse data from 65 Brazilian cities that have adopted the
+full fare exemption on public transport, more popularly known in Brazil
+as the "Tarifa Zero", a term that will be used in this report to refer
+to this policy. For the selection of cases, three criteria were used: i.
+The policy was implemented in all transport networks in the city; ii. It
+is available to all users and; iii. it was not discontinued until
+December 2022. We intend to present an exploratory analysis of public
+data about the studied municipalities and characterize them by checking
+if there is homogeneity in their economic and social characteristics, in
+addition to comparing them with all others that have not adopted the
+policy, with the objective to understand the differences and disparities
+between the two groups of cities, based on Political Science Teories, in
+order to undertand why this policy was implemented.
 
 ## **Descriptive Analysis**
 
@@ -144,11 +160,10 @@ This report analyse data from 65 Brazilian cities that have adopted the full far
      
 ```
 
-## 2.  Localization of municipalities
+## 2. Localization of municipalities
 
-The map below shows us the location of the cities, the points
-represent the municipalities: 
-
+The map below shows us the location of the cities, the points represent
+the municipalities:
 
 ```{r Mapa dos municipios, fig.align = 'center', out.width = "90%"}
 
@@ -193,9 +208,7 @@ tarifa_zero <- ffpt_muni_5 %>% filter(tarifa_zero == "sim") %>% select(latitude,
 
 ```
 
-
 ## 3. Region of municipalities
-
 
 ```{r Região dos Municípios,fig.align = 'center', out.width = "50%"}
 
@@ -223,7 +236,7 @@ tarifa_zero <- ffpt_muni_5 %>% filter(tarifa_zero == "sim") %>% select(latitude,
 
 ```
 
-##  4. State of municipalities
+## 4. State of municipalities
 
 ```{r UF dos municípios, fig.align = 'center', out.width = "50%"}
 
@@ -252,7 +265,6 @@ tarifa_zero <- ffpt_muni_5 %>% filter(tarifa_zero == "sim") %>% select(latitude,
 ```
 
 ## 5. Population Class
-
 
 ```{r}
 
@@ -295,9 +307,7 @@ tarifa_zero <- ffpt_muni_5 %>% filter(tarifa_zero == "sim") %>% select(latitude,
 
 ```
 
-
 ## 4. Year of Implementation
-
 
 ```{r}
 
@@ -338,17 +348,23 @@ ggplot() +
 
 ```
 
----
+------------------------------------------------------------------------
 
 ## **Exploratory Analysis**
 
-
 ## 1.Análise da Teoria do Eleitor Mediano
 
+**1° Premissa:** "Quanto maior a desigualdade, maior a exigência por
+serviços públicos e consequente aumento do gasto público. Portanto,
+cidades com tarifa zero devem ser mais desiguais do que cidades sem essa
+política."
 
-**1° Premissa:** "Quanto maior a desigualdade, maior a exigência por serviços públicos e consequente aumento do gasto público. Portanto, cidades com tarifa zero devem ser mais desiguais do que cidades sem essa política." 
-
-Para verificar se essa premissa de fato pode nos ajudar a explicar a tarifa zero, vejamos primeiro o Gini e o Theil-L, ambos são índices de desigualdade amplamente utilizados, medem o grau de concentração de renda em determinado grupo e variam de 0 a 1, sendo 0 uma situação de completa igualdade e 1 uma situação de completa desigualdade, nesse caso estão usando dados do censo de 2010.
+Para verificar se essa premissa de fato pode nos ajudar a explicar a
+tarifa zero, vejamos primeiro o Gini e o Theil-L, ambos são índices de
+desigualdade amplamente utilizados, medem o grau de concentração de
+renda em determinado grupo e variam de 0 a 1, sendo 0 uma situação de
+completa igualdade e 1 uma situação de completa desigualdade, nesse caso
+estão usando dados do censo de 2010.
 
 ```{r Indice de Gini e Theil media geral}
 
@@ -384,18 +400,18 @@ media_indice_theil_geral <- banco_completo %>%
 
 ```
 
-
-degree of income concentration in a given group and range from 0 to 1,
-0 being a situation of complete equality, and 1 being a situation of complete
-inequality, in addition both are using data from the 2010 census.
-The general median of the Gini index in the studied cities is
- `r media_indice_gini_tf`, while for municipalities without a Zero Tariff it is
-`r media_indice_gini_geral`. There is only a small difference in the averages. And the same is true for the
-Theil-L index, where the median in the first group is `r media_indice_theil_tf`, while in the second group it is
- `r media_indice_theil_geral`, but similarly the municipalities with Tarifa Zero present values that indicate less social inequality.
-Below we can see the distribution graph of the values of the two indexes for all
-the municipalities with a Tarifa Zero: 
-
+degree of income concentration in a given group and range from 0 to 1, 0
+being a situation of complete equality, and 1 being a situation of
+complete inequality, in addition both are using data from the 2010
+census. The general median of the Gini index in the studied cities is
+`r media_indice_gini_tf`, while for municipalities without a Zero Tariff
+it is `r media_indice_gini_geral`. There is only a small difference in
+the averages. And the same is true for the Theil-L index, where the
+median in the first group is `r media_indice_theil_tf`, while in the
+second group it is `r media_indice_theil_geral`, but similarly the
+municipalities with Tarifa Zero present values that indicate less social
+inequality. Below we can see the distribution graph of the values of the
+two indexes for all the municipalities with a Tarifa Zero:
 
 ```{r Gráfico GINI e Theil 1, fig.align = 'center', out.width = "70%", dpi=300}
 
@@ -425,10 +441,9 @@ banco_completo %>%
 
 ```
 
-Tabela Separandos os valores por UF: 
+Tabela Separandos os valores por UF:
 
-
-```{r}
+```{r fig.align = 'center', out.width = "70%", dpi=300}
 
   ffpt <- banco_completo %>% 
   filter(tarifa_zero == "sim") %>% 
@@ -463,13 +478,19 @@ Tabela Separandos os valores por UF:
 
 ```
 
+**2° Premissa:** "Quanto menor a riqueza medida através do PIB, maior a
+demanda por políticas redistributivas. Dessa forma, cidades com tarifa
+zero dispõem de menor PIB per capita do que cidades sem essa política."
 
-**2° Premissa:** "Quanto menor a riqueza medida através do PIB, maior a demanda por políticas redistributivas. Dessa forma, cidades com tarifa zero dispõem de menor PIB per capita do que cidades sem essa política."
+Para essa análise fizemos um corte comparando apenas as cidades com até
+150 mil reais de PIB per capta, tanto com tarifa zero quanto sem tarifa
+zero. Isso não significa retirar muitas cidades da base de dados já que
+99,45% das cidades sem tarifa zero (e com menos de 300 mil habitantes)
+estão dentro desse valor de PIB per capita, no caso das cidades com
+tarifa zero, isso representa 96,4% das cidades, essa foi uma forma de
+retirar os valores discrepantes da análise e torná-la mais evidente.
 
-Para essa análise fizemos um corte comparando apenas as cidades com até 150 mil reais de PIB per capta, tanto com tarifa zero quanto sem tarifa zero. Isso não significa retirar muitas cidades da base de dados já que 99,45% das cidades sem tarifa zero (e com menos de 300 mil habitantes) estão dentro desse valor de PIB per capita, no caso das cidades com tarifa zero, isso representa 96,4% das cidades, essa foi uma forma de retirar os valores discrepantes da análise e torná-la mais evidente. 
-
-
-```{r PIB, fig.align = 'center', out.width = "70%", dpi=300}
+```{r PIB Gráfico, fig.align = 'center', out.width = "70%", dpi=300}
 
 
 # Gráfico
@@ -500,17 +521,309 @@ banco_completo %>%
 ```
 
 
+Tabela Separandos os valores por UF:
+
+```{r PIB tabela}
+
+ffpt <- banco_completo %>% 
+  rename(pib_per_capta = produto_interno_bruto_per_capita_a_precos_correntes_r_1_00) %>% 
+  filter(pib_per_capta < 150000) %>% 
+  filter(tarifa_zero == "sim") %>% 
+  select(regiao, pib_per_capta) %>% 
+  group_by(regiao) %>% 
+  summarise(media_pib = median(pib_per_capta))
 
 
+# munic sem ffpt:
+
+  banco_completo %>% 
+  rename(pib_per_capta = produto_interno_bruto_per_capita_a_precos_correntes_r_1_00) %>% 
+  filter(pib_per_capta < 150000) %>%
+  filter(tarifa_zero == "não") %>% 
+  select(regiao, pib_per_capta) %>% 
+  group_by(regiao) %>% 
+  summarise(media_pib = median(pib_per_capta)) %>% 
+  left_join(ffpt, by = "regiao") %>% 
+  select(regiao, media_pib.x, media_pib.y) %>% 
+      reactable(
+      fullWidth = F,
+      defaultColDef = colDef(
+      align = "center"),
+      columns = list(
+      regiao = colDef("Região", minWidth = 130),
+      media_pib.y = colDef("Cidades com Tarifa Zero", format = colFormat(prefix = "R$ ", separators = TRUE), minWidth = 130),
+      media_pib.x = colDef("Cidades sem Tarifa Zero", format = colFormat(prefix = "R$ ", separators = TRUE),  minWidth = 130)))
+
+  
 
 
+```
+
+**3° premissa** Trabalhadores informais são mais favoráveis à política pois não usufruem da política de vale transporte limitada à trabalhadores formais, por isso nas cidades com tarifa zero há mais trabalhadores informais do que formais. 
 
 
+```{r eval=FALSE, include=FALSE}
+
+dadosPNADc_brutos <- get_pnadc(year=2017, quarter=4, vars=c("V2009","V4009","V4012", "V4029"), design=FALSE)
 
 
+```
 
 
+## 2. Teoria das Capacidades Estatais 
 
+**1° premissa:** Cidades que implementam políticas redistributivas dispõem de mais recursos e melhor capacidade administrativa. Por isso cidades com tarifa zero devem possuir mais secretarias exclusivas do que cidades sem essa política
+
+
+```{r}
+
+ffpt_orgao <- banco_completo %>% 
+  mutate(caracterizacao_do_orgao_gestor = case_when(caracterizacao_do_orgao_gestor =="Não informou" ~ "Não possui ou não informou",
+                                                      caracterizacao_do_orgao_gestor == "Não possui estrutura" ~ "Não possui ou não informou", 
+                                                      caracterizacao_do_orgao_gestor == "Recusa" ~ "Não possui ou não informou",
+                                                      TRUE~(caracterizacao_do_orgao_gestor))) %>% 
+  filter(tarifa_zero == "sim") %>% 
+  group_by(caracterizacao_do_orgao_gestor) %>% 
+  tally() %>% 
+  mutate(pct_ffpt = n/sum(n)) %>% 
+  select(-2)
+
+banco_completo %>% 
+  mutate(caracterizacao_do_orgao_gestor = case_when(caracterizacao_do_orgao_gestor =="Não informou" ~ "Não possui ou não informou",
+                                                      caracterizacao_do_orgao_gestor == "Não possui estrutura" ~ "Não possui ou não informou", 
+                                                      caracterizacao_do_orgao_gestor == "Recusa" ~ "Não possui ou não informou",
+                                                      TRUE~(caracterizacao_do_orgao_gestor))) %>% 
+  filter(tarifa_zero == "não") %>% 
+  group_by(caracterizacao_do_orgao_gestor) %>% 
+  tally() %>% 
+  mutate(pct_geral = n/sum(n)) %>% 
+  select(-2) %>% 
+  left_join(ffpt_orgao, by = "caracterizacao_do_orgao_gestor") %>% 
+  mutate_if(is.numeric, ~replace(., is.na(.), 0)) %>% 
+  adorn_pct_formatting(digits = 0) %>% 
+  kbl(col.names = c("Caracterização do orgão gestor", "Cidades sem Tarifa Zero", "Cidades com Tarifa Zero"), caption = "Tabela 3: Caracterização do Orgão Gestor") %>%
+  kable_classic(full_width = F , html_font = "Cambria") %>% 
+  footnote(general = "IBGE, 2021 ",
+           general_title = "Fonte: ", number_title = "Type I: ",
+           footnote_as_chunk = T, title_format = c("italic")
+           )
+  
+  
+```
+
+
+**2° premissa:**Cidades que implementam políticas redistributivas dispõem de mais recursos e melhor capacidade administrativa. Por isso cidades com tarifa zero possuem gestores com mais qualificação acadêmica. 
+
+
+```{r}
+
+ffpt_escolaridade <- banco_completo %>% 
+    filter(escolaridade_do_a_titular_do_orgao_gestor == "Doutorado" |
+         escolaridade_do_a_titular_do_orgao_gestor == "Ensino médio (2º Grau) completo"|
+         escolaridade_do_a_titular_do_orgao_gestor == "Ensino superior completo"|
+         escolaridade_do_a_titular_do_orgao_gestor == "Especialização" | 
+         escolaridade_do_a_titular_do_orgao_gestor == "Mestrado") %>% 
+  mutate(escolaridade_do_a_titular_do_orgao_gestor = factor(escolaridade_do_a_titular_do_orgao_gestor, levels = c("Ensino médio (2º Grau) completo", 
+                                                   "Ensino superior completo", 
+                                                   "Especialização", 
+                                                   "Mestrado",
+                                                   "Doutorado", ordered = TRUE))) %>% 
+  filter(tarifa_zero == "sim") %>% 
+  group_by(escolaridade_do_a_titular_do_orgao_gestor) %>% 
+  tally() %>% 
+  mutate(pct_ffpt = n/sum(n)) %>% 
+  select(-2)
+
+banco_completo %>% 
+    filter(escolaridade_do_a_titular_do_orgao_gestor == "Doutorado" |
+         escolaridade_do_a_titular_do_orgao_gestor == "Ensino médio (2º Grau) completo"|
+         escolaridade_do_a_titular_do_orgao_gestor == "Ensino superior completo"|
+         escolaridade_do_a_titular_do_orgao_gestor == "Especialização" | 
+         escolaridade_do_a_titular_do_orgao_gestor == "Mestrado") %>% 
+  mutate(escolaridade_do_a_titular_do_orgao_gestor = factor(escolaridade_do_a_titular_do_orgao_gestor, levels = c("Ensino médio (2º Grau) completo", 
+                                                   "Ensino superior completo", 
+                                                   "Especialização", 
+                                                   "Mestrado",
+                                                   "Doutorado", ordered = TRUE))) %>% 
+  filter(tarifa_zero == "não") %>% 
+  group_by(escolaridade_do_a_titular_do_orgao_gestor) %>% 
+  tally() %>% 
+  mutate(pct_escol = n/sum(n)) %>% 
+  select(-2) %>% 
+  left_join(ffpt_escolaridade, by = "escolaridade_do_a_titular_do_orgao_gestor") %>% 
+  adorn_pct_formatting(digits = 0) %>% 
+mutate(pct_ffpt = gsub(pattern = "-",replacement = "0%", pct_ffpt)) %>% 
+kbl(col.names = c("Escolaridade", "Cidades sem Tarifa Zero", "Cidades com Tarifa Zero"), caption = "Tabela 4: Escolaridade do Titular do Orgão Gestor") %>%
+kable_classic(full_width = F , html_font = "Cambria") %>% 
+footnote(general = "IBGE, 2021 ",
+           general_title = "Fonte: ", number_title = "Type I: ",
+           footnote_as_chunk = T, title_format = c("italic")
+           )
+  
+
+```
+
+
+**3° premissa:** Cidades que implementam políticas redistributivas dispõem de mais recursos e melhor capacidade administrativa. Por isso cidades com tarifa zero dispõem de maior quantidade de conselhos de transporte público em relação à cidades sem a política 
+
+
+```{r}
+
+ffpt_conselho <- banco_completo %>% 
+       mutate(conselho_municipal_de_transporte_existencia =case_when(conselho_municipal_de_transporte_existencia =="Não" ~"Não ou não informou",
+                                                       conselho_municipal_de_transporte_existencia == "Não informou" ~ "Não ou não informou", 
+                                                       conselho_municipal_de_transporte_existencia == "Recusa" ~ "Não ou não informou",
+                                                       TRUE~(conselho_municipal_de_transporte_existencia))) %>% 
+  filter(tarifa_zero == "sim") %>% 
+  group_by(conselho_municipal_de_transporte_existencia) %>% 
+  tally() %>% 
+  mutate(pct_ffpt = n/sum(n)) %>% 
+  select(-2)
+
+banco_completo %>% 
+         mutate(conselho_municipal_de_transporte_existencia =case_when(conselho_municipal_de_transporte_existencia =="Não" ~"Não ou não informou",
+                                                       conselho_municipal_de_transporte_existencia == "Não informou" ~ "Não ou não informou", 
+                                                       conselho_municipal_de_transporte_existencia == "Recusa" ~ "Não ou não informou",
+                                                       TRUE~(conselho_municipal_de_transporte_existencia))) %>% 
+  filter(tarifa_zero == "não") %>% 
+  group_by(conselho_municipal_de_transporte_existencia) %>% 
+  tally() %>% 
+  mutate(pct_conselho = n/sum(n)) %>% 
+  select(-2) %>% 
+  left_join(ffpt_conselho, by = "conselho_municipal_de_transporte_existencia") %>% 
+  adorn_pct_formatting(digits = 0) %>% 
+kbl(col.names = c("Existe Conselho na Cidade?", "Cidades sem Tarifa Zero", "Cidades com Tarifa Zero"), caption = "Tabela 5: Existência de Conselho Municipal de Transporte") %>%
+kable_classic(full_width = F , html_font = "Cambria") %>% 
+footnote(general = "IBGE, 2021 ",
+           general_title = "Fonte: ", number_title = "Type I: ",
+           footnote_as_chunk = T, title_format = c("italic")
+           )
+  
+
+```
+
+**4° premissa:** Cidades que implementam políticas redistributivas dispõem de mais recursos e melhor capacidade administrativa. Por isso cidades com tarifa zero dispõem de Fundo Municipal de Transporte em relação à cidades sem a política 
+
+```{r}
+
+ffpt_fundo <- banco_completo %>% 
+  mutate(fundo_municipal_de_transporte_existencia = case_when(fundo_municipal_de_transporte_existencia =="Não" ~"Não ou não informou",
+                                                      fundo_municipal_de_transporte_existencia == "Não informou" ~ "Não ou não informou", 
+                                                      fundo_municipal_de_transporte_existencia == "Recusa" ~ "Não ou não informou",
+                                                       TRUE~(fundo_municipal_de_transporte_existencia))) %>% 
+  filter(tarifa_zero == "sim") %>% 
+  group_by(fundo_municipal_de_transporte_existencia) %>% 
+  tally() %>% 
+  mutate(pct_ffpt = n/sum(n)) %>% 
+  select(-2)
+
+banco_completo %>%
+  mutate(fundo_municipal_de_transporte_existencia = case_when(fundo_municipal_de_transporte_existencia =="Não" ~"Não ou não informou",
+                                                       fundo_municipal_de_transporte_existencia == "Não informou" ~ "Não ou não informou", 
+                                                       fundo_municipal_de_transporte_existencia == "Recusa" ~ "Não ou não informou",
+                                                       TRUE~(fundo_municipal_de_transporte_existencia))) %>% 
+  filter(tarifa_zero == "não") %>% 
+  group_by(fundo_municipal_de_transporte_existencia) %>% 
+  tally() %>% 
+  mutate(pct_conselho = n/sum(n)) %>% 
+  select(-2) %>% 
+  left_join(ffpt_fundo, by = "fundo_municipal_de_transporte_existencia") %>% 
+  adorn_pct_formatting(digits = 0) %>% 
+kbl(col.names = c("Existe Fundo Municipal?", "Cidades sem Tarifa Zero", "Cidades com Tarifa Zero"), caption = "Tabela 6: Existência de Fundo Municipal de Transporte") %>%
+kable_classic(full_width = F, html_font = "Cambria") %>% 
+footnote(general = "IBGE, 2021 ",
+           general_title = "Fonte: ", number_title = "Type I: ",
+           footnote_as_chunk = T, title_format = c("italic")
+           )
+  
+
+```
+
+
+**5° premissa:** Cidades que implementam políticas redistributivas dispõem de mais recursos e melhor capacidade administrativa. Por isso cidades com tarifa zero dispõem de Plano de Mobilidade Urbana em mais cidades do que em relação à cidades sem a política 
+
+
+```{r}
+
+
+ffpt_plano <- banco_completo %>% 
+     mutate(possui_plano_de_mobilidade_urbana =case_when(possui_plano_de_mobilidade_urbana =="SIM" ~"Sim",
+                                                       possui_plano_de_mobilidade_urbana == "Nao foi enviado oficio" ~ "Não ou não respondeu", 
+                                                       possui_plano_de_mobilidade_urbana == "Nao respondeu" ~ "Não ou não respondeu",
+                                                       possui_plano_de_mobilidade_urbana == "Nao" ~ "Não ou não respondeu",
+                                                       TRUE~(possui_plano_de_mobilidade_urbana))) %>% 
+  filter(tarifa_zero == "sim") %>% 
+  group_by(possui_plano_de_mobilidade_urbana) %>% 
+  tally() %>% 
+  mutate(pct_ffpt = n/sum(n)) %>% 
+  select(-2)
+
+banco_completo %>% 
+     mutate(possui_plano_de_mobilidade_urbana =case_when(possui_plano_de_mobilidade_urbana =="SIM" ~"Sim",
+                                                       possui_plano_de_mobilidade_urbana == "Nao foi enviado oficio" ~ "Não ou não respondeu", 
+                                                       possui_plano_de_mobilidade_urbana == "Nao respondeu" ~ "Não ou não respondeu",
+                                                       possui_plano_de_mobilidade_urbana == "Nao" ~ "Não ou não respondeu",
+                                                       TRUE~(possui_plano_de_mobilidade_urbana))) %>% 
+  filter(tarifa_zero == "não") %>% 
+  group_by(possui_plano_de_mobilidade_urbana) %>% 
+  tally() %>% 
+  mutate(pct_conselho = n/sum(n)) %>% 
+  select(-2) %>% 
+  left_join(ffpt_plano, by = "possui_plano_de_mobilidade_urbana") %>% 
+  adorn_pct_formatting(digits = 0) %>% 
+kbl(col.names = c("Existe Plano de Mobilidade Urbana?", "Cidades sem Tarifa Zero", "Cidades com Tarifa Zero"), caption = "Tabela 6: Existência de Plano de Mobilidade Urbana") %>%
+kable_classic(full_width = F, html_font = "Cambria") %>% 
+footnote(general = "IBGE, 2021 ",
+           general_title = "Fonte: ", number_title = "Type I: ",
+           footnote_as_chunk = T, title_format = c("italic")
+           )
+  
+
+```
+
+
+**6° premissa:** Cidades que implementam políticas redistributivas dispõem de mais recursos e melhor capacidade administrativa. Por isso cidades com tarifa zero dispõem de maior "Prosperidade Social" indicador definido pelo IPEA
+
+```{r}
+
+
+  ffpt_ps <- banco_completo %>% 
+  mutate(prosperidade_social = factor(prosperidade_social, levels = c("Muito Alto", 
+                                                   "Alto", 
+                                                   "Baixo", 
+                                                   "Muito Baixo",
+                                                   "Médio", ordered = TRUE))) %>%
+  filter(tarifa_zero == "sim") %>% 
+  group_by(prosperidade_social) %>% 
+  tally() %>% 
+  mutate(pct_ffpt = n/sum(n)) %>% 
+  select(-2)
+
+banco_completo %>% 
+  mutate(prosperidade_social = factor(prosperidade_social, levels = c("Muito Alto", 
+                                                   "Alto", 
+                                                   "Baixo", 
+                                                   "Muito Baixo",
+                                                   "Médio", ordered = TRUE))) %>%
+  filter(tarifa_zero == "não") %>% 
+  group_by(prosperidade_social) %>% 
+  tally() %>% 
+  mutate(pct_geral = n/sum(n)) %>% 
+  select(-2) %>% 
+  left_join(ffpt_ps, by = "prosperidade_social") %>% 
+  adorn_pct_formatting(digits = 0) %>% 
+  mutate(pct_ffpt = gsub(pattern = "-",replacement = "0%", pct_ffpt)) %>% 
+kbl(col.names = c("Índice de Prosperidade Social", "Cidades sem Tarifa Zero", "Cidades com Tarifa Zero"), caption = "Tabela 6: Índice de Prosperidade Social") %>%
+kable_classic(full_width = F, html_font = "Cambria") %>% 
+footnote(general = "IPEA, 2010",
+           general_title = "Fonte: ", number_title = "Type I: ",
+           footnote_as_chunk = T, title_format = c("italic")
+           )
+
+
+```
+
+**7° premissa:** Cidades que implementam políticas redistributivas dispõem de mais recursos e melhor capacidade administrativa. Verificar a quantidade de funcionários estatutários dos municípios - Carreira estável e recrutamento baseado no mérito produz capacidade estatal para adoção de políticas urbanas
 
 
 
