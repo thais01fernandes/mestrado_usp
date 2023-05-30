@@ -34,7 +34,7 @@ Este trabalho de mestrado é uma análise exploratória a respeito da adoção d
 
 9. [abjData - Compilado de Dados PNUD, 2010](https://abjur.github.io/abjData/)
 
-10.[Dados espaciais oficiais - Pacote Geobr](https://github.com/ipeaGIT/geobr)
+10. [Dados espaciais oficiais - Pacote Geobr](https://github.com/ipeaGIT/geobr)
 
 
 ## Municípios Entrevistados para Análise Qualitativa 
