@@ -39,8 +39,6 @@ file3 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/d
 munic_transporte <- read_delim(file3, delim = ",", 
                                locale = locale(encoding='latin1')) 
 
-                               
-                               
 
 # Área Territorial dos municípios, IBGE, 2022
 # endereço: https://www.ibge.gov.br/geociencias/organizacao-do-territorio/estrutura-territorial/15761-areas-dos-municipios.html?=&t=downloads
@@ -64,7 +62,12 @@ file6 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/d
   indice_ipea <- read_delim(file6, delim = ",",
                           locale = locale(encoding='latin1'))
   
-
+# Base de Recursos Humanos da Base de Informações Municipais de 2021
+# Endereço: https://www.ibge.gov.br/estatisticas/sociais/saude/10586-pesquisa-de-informacoes-basicas-municipais.html?=&t=downloads
+  
+file7 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/recursos_humanos"
+  recursos_humanos <- read_delim(file7, delim = ",",
+                            locale = locale(encoding='latin1'))
 
 # Todos os seguintes dados foram baixados do pacote R "abjData": Índice de Desenvolvimento Humano Municipal (IDHM), índice de Gini e índice de Theil, IVS municipal, Índice de prosperidade social, População Urbana e Rural, Renda per Capta, % de pobres
 # Os dados do índice de vulnerabilidade econômica foram retirados do site do ipea: http://ivs.ipea.gov.br/index.php/pt/planilha 
@@ -173,7 +176,14 @@ banco_completo <-
                                      ivs_capital_humano  >= 0.301 & ivs_capital_humano <= 0.400 ~ "Medium", 
                                      ivs_capital_humano  >= 0.401 ~"High", TRUE ~ "indice_ivs")) %>% 
   mutate(taxa_urbanizacao = pesourb/pesotot) %>% 
-  mutate(densidade_demografica = populacao_estimada/ar_mun_2022)
+  mutate(densidade_demografica = populacao_estimada/ar_mun_2022) %>% 
+  left_join(recursos_humanos, by = c("cod_munic" = "CodMun")) %>% 
+  select(-75:-81, -88:-94) %>% 
+  rename(Estatutarios = Mreh0111, 
+         Celetistas = Mreh0112, 
+         Comissionados = Mreh0113, 
+         Estagiarios = Mreh0114, 
+         sem_vinculo_permanente = Mreh0115)
   
 
 # Salvando o banco completo no Github pra ser usado no arquivo Rmarckdown que será usado para o relatório:

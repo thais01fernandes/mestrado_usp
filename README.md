@@ -22,7 +22,7 @@ Este trabalho de mestrado é uma análise exploratória a respeito da adoção d
 
 3. [Cidades com tarifa zero - levantamento produzido por pesquisadores do tema](https://docs.google.com/spreadsheets/d/1UnKXflAf5RVRMhCL-FuroTsPZBy7am3qAmD5j_hXc3g/edit#gid=0)
 
-4. [Base de dados sobre transporte público - IBGE, 2020](https://www.ibge.gov.br/estatisticas/sociais/saude/10586-pesquisa-de-informacoes-basicas-municipais.html?=&t=downloads) 
+4. [Pesquisa de Informações Básicas Municipais - IBGE,2021 e 2020](https://www.ibge.gov.br/estatisticas/sociais/saude/10586-pesquisa-de-informacoes-basicas-municipais.html?=&t=downloads) 
 
 5. [Área Territorial dos municípios, IBGE, 2022](https://www.ibge.gov.br/geociencias/organizacao-do-territorio/estrutura-territorial/15761-areas-dos-municipios.html?=&t=downloads)
 
@@ -33,6 +33,8 @@ Este trabalho de mestrado é uma análise exploratória a respeito da adoção d
 8. [Informações Básicas Municipais - IBGE, 2020](https://www.ibge.gov.br/estatisticas/sociais/saude/10586-pesquisa-de-informacoes-basicas-municipais.html?=&t=downloads)
 
 9. [abjData - Compilado de Dados PNUD, 2010](https://abjur.github.io/abjData/)
+
+10. [Dados espaciais oficiais - Pacote Geobr] (https://github.com/ipeaGIT/geobr)
 
 
 ## Municípios Entrevistados para Análise Qualitativa 
