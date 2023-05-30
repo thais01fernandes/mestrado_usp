@@ -63,6 +63,8 @@ plano_mob <- read_delim(file5, delim = ",",
 file6 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/indice_ipea"
   indice_ipea <- read_delim(file6, delim = ",",
                           locale = locale(encoding='latin1'))
+  
+
 
 # Todos os seguintes dados foram baixados do pacote R "abjData": Índice de Desenvolvimento Humano Municipal (IDHM), índice de Gini e índice de Theil, IVS municipal, Índice de prosperidade social, População Urbana e Rural, Renda per Capta, % de pobres
 # Os dados do índice de vulnerabilidade econômica foram retirados do site do ipea: http://ivs.ipea.gov.br/index.php/pt/planilha 
