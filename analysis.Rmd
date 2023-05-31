@@ -64,7 +64,7 @@ library(PNADcIBGE)
 
 file1 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/banco_completo"
 banco_completo <- read_delim(file1, delim = ",", 
-                        locale = locale(encoding='latin1')) %>% select(-1)
+                        locale = locale(encoding='UTF-8')) %>% select(-1)
 
 file2 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/geo_ufs_2"
 geo_ufs_2 <- read_delim(file2, delim = ",", 
@@ -416,7 +416,7 @@ two indexes for all the municipalities with a Tarifa Zero:
 ```{r Gráfico GINI e Theil 1, fig.align = 'center', out.width = "70%", dpi=300}
 
 banco_completo %>% 
-  pivot_longer(cols = c("gini", "theil")) %>%
+ pivot_longer(cols = c("gini", "theil")) %>%
   mutate(name = case_when(
     name == "gini" ~ "Gini",
     name == "theil" ~ "Theil-L")) %>% 
@@ -601,7 +601,7 @@ banco_completo %>%
   left_join(ffpt_orgao, by = "caracterizacao_do_orgao_gestor") %>% 
   mutate_if(is.numeric, ~replace(., is.na(.), 0)) %>% 
   adorn_pct_formatting(digits = 0) %>% 
-  kbl(col.names = c("Caracterização do orgão gestor", "Cidades sem Tarifa Zero", "Cidades com Tarifa Zero"), caption = "Tabela 3: Caracterização do Orgão Gestor") %>%
+  kbl(col.names = c("Caracterização do orgão gestor", "Cidades sem Tarifa Zero", "Cidades com Tarifa Zero"), caption = "Tabela 1: Caracterização do Orgão Gestor") %>%
   kable_classic(full_width = F , html_font = "Cambria") %>% 
   footnote(general = "IBGE, 2021 ",
            general_title = "Fonte: ", number_title = "Type I: ",
@@ -653,7 +653,7 @@ banco_completo %>%
   left_join(ffpt_escolaridade, by = "escolaridade_do_a_titular_do_orgao_gestor") %>% 
   adorn_pct_formatting(digits = 0) %>% 
 mutate(pct_ffpt = gsub(pattern = "-",replacement = "0%", pct_ffpt)) %>% 
-kbl(col.names = c("Escolaridade", "Cidades sem Tarifa Zero", "Cidades com Tarifa Zero"), caption = "Tabela 4: Escolaridade do Titular do Orgão Gestor") %>%
+kbl(col.names = c("Escolaridade", "Cidades sem Tarifa Zero", "Cidades com Tarifa Zero"), caption = "Tabela 2: Escolaridade do Titular do Orgão Gestor") %>%
 kable_classic(full_width = F , html_font = "Cambria") %>% 
 footnote(general = "IBGE, 2021 ",
            general_title = "Fonte: ", number_title = "Type I: ",
@@ -692,7 +692,7 @@ banco_completo %>%
   select(-2) %>% 
   left_join(ffpt_conselho, by = "conselho_municipal_de_transporte_existencia") %>% 
   adorn_pct_formatting(digits = 0) %>% 
-kbl(col.names = c("Existe Conselho na Cidade?", "Cidades sem Tarifa Zero", "Cidades com Tarifa Zero"), caption = "Tabela 5: Existência de Conselho Municipal de Transporte") %>%
+kbl(col.names = c("Existe Conselho na Cidade?", "Cidades sem Tarifa Zero", "Cidades com Tarifa Zero"), caption = "Tabela 3: Existência de Conselho Municipal de Transporte") %>%
 kable_classic(full_width = F , html_font = "Cambria") %>% 
 footnote(general = "IBGE, 2021 ",
            general_title = "Fonte: ", number_title = "Type I: ",
@@ -729,7 +729,7 @@ banco_completo %>%
   select(-2) %>% 
   left_join(ffpt_fundo, by = "fundo_municipal_de_transporte_existencia") %>% 
   adorn_pct_formatting(digits = 0) %>% 
-kbl(col.names = c("Existe Fundo Municipal?", "Cidades sem Tarifa Zero", "Cidades com Tarifa Zero"), caption = "Tabela 6: Existência de Fundo Municipal de Transporte") %>%
+kbl(col.names = c("Existe Fundo Municipal?", "Cidades sem Tarifa Zero", "Cidades com Tarifa Zero"), caption = "Tabela 4: Existência de Fundo Municipal de Transporte") %>%
 kable_classic(full_width = F, html_font = "Cambria") %>% 
 footnote(general = "IBGE, 2021 ",
            general_title = "Fonte: ", number_title = "Type I: ",
@@ -771,7 +771,7 @@ banco_completo %>%
   select(-2) %>% 
   left_join(ffpt_plano, by = "possui_plano_de_mobilidade_urbana") %>% 
   adorn_pct_formatting(digits = 0) %>% 
-kbl(col.names = c("Existe Plano de Mobilidade Urbana?", "Cidades sem Tarifa Zero", "Cidades com Tarifa Zero"), caption = "Tabela 6: Existência de Plano de Mobilidade Urbana") %>%
+kbl(col.names = c("Existe Plano de Mobilidade Urbana?", "Cidades sem Tarifa Zero", "Cidades com Tarifa Zero"), caption = "Tabela 5: Existência de Plano de Mobilidade Urbana") %>%
 kable_classic(full_width = F, html_font = "Cambria") %>% 
 footnote(general = "IBGE, 2021 ",
            general_title = "Fonte: ", number_title = "Type I: ",
@@ -823,7 +823,41 @@ footnote(general = "IPEA, 2010",
 
 ```
 
-**7° premissa:** Cidades que implementam políticas redistributivas dispõem de mais recursos e melhor capacidade administrativa. Verificar a quantidade de funcionários estatutários dos municípios - Carreira estável e recrutamento baseado no mérito produz capacidade estatal para adoção de políticas urbanas
+**7° premissa:** Cidades que implementam políticas redistributivas dispõem de mais recursos e melhor capacidade administrativa. Verificar a quantidade de funcionários estatutários dos municípios da administração direta - Carreira estável e recrutamento baseado no mérito produz capacidade estatal para adoção de políticas urbanas
+
+
+```{r}
+
+recursos_humanos_ffpt <- 
+banco_completo %>% 
+mutate(Estatutarios = as.double(Estatutarios), Celetistas = as.double(Celetistas), Estagiarios = as.double(Estagiarios), `Sem vinculo Permanente` = as.double(sem_vinculo_permanente)) %>% 
+pivot_longer(cols = c("Estatutarios", "Celetistas", "Comissionados", "Estagiarios", "Sem vinculo Permanente")) %>% 
+group_by(tarifa_zero, name) %>% 
+summarise(media_ffpt = median(value, na.rm = TRUE)) %>% 
+filter(tarifa_zero == "sim") %>% 
+ungroup() %>% 
+select(-tarifa_zero)
+
+
+banco_completo %>% 
+mutate(Estatutarios = as.double(Estatutarios), Celetistas = as.double(Celetistas), Estagiarios = as.double(Estagiarios), `Sem vinculo Permanente` = as.double(sem_vinculo_permanente)) %>% 
+pivot_longer(cols = c("Estatutarios", "Celetistas", "Comissionados", "Estagiarios", "Sem vinculo Permanente")) %>% 
+group_by(tarifa_zero, name) %>% 
+summarise(media_geral = median(value, na.rm = TRUE)) %>% 
+filter(tarifa_zero == "não") %>% 
+ungroup() %>% 
+left_join(recursos_humanos_ffpt, by = "name") %>% 
+select(-tarifa_zero) %>% 
+kbl(col.names = c("Regime de Contratação", "Cidades sem Tarifa Zero", "Cidades com Tarifa Zero"), caption = "Tabela 7: Regime de Contratação dos Funcionários da Administração Direta") %>%
+kable_classic(full_width = F , html_font = "Cambria") %>% 
+footnote(general = "IBGE, 2021 ",
+           general_title = "Fonte: ", number_title = "Type I: ",
+           footnote_as_chunk = T, title_format = c("italic")
+           )
+
+
+
+```
 
 
 

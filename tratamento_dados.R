@@ -177,18 +177,19 @@ banco_completo <-
                                      ivs_capital_humano  >= 0.401 ~"High", TRUE ~ "indice_ivs")) %>% 
   mutate(taxa_urbanizacao = pesourb/pesotot) %>% 
   mutate(densidade_demografica = populacao_estimada/ar_mun_2022) %>% 
-  left_join(recursos_humanos, by = c("cod_munic" = "CodMun")) %>% 
+  left_join(recursos_humanos, by = c("cod_munic" = "CodMun")) %>% View()
   select(-75:-81, -88:-94) %>% 
   rename(Estatutarios = Mreh0111, 
          Celetistas = Mreh0112, 
          Comissionados = Mreh0113, 
          Estagiarios = Mreh0114, 
-         sem_vinculo_permanente = Mreh0115)
+         sem_vinculo_permanente = Mreh0115) %>% View()
   
 
 # Salvando o banco completo no Github pra ser usado no arquivo Rmarckdown que será usado para o relatório:
 
 write.csv(banco_completo, "banco_completo")
+
 
 # Baixando dados para o mapa com Geobr 
 
@@ -228,6 +229,4 @@ muni_geobr_3 <- muni_geobr_1 %>%
 write.csv(geo_ufs_2, "geo_ufs_2")
 
 write.csv(muni_geobr_3, "muni_geobr_3")
-
-
 
