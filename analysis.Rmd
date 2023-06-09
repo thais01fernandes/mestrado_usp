@@ -54,6 +54,7 @@ library("leaflet")
 library('ggthemes')
 library('rmdformats')
 library("janitor")
+library("reactablefmtr")
 # install.packages("PNADcIBGE")
 library(PNADcIBGE)
 
@@ -64,7 +65,8 @@ library(PNADcIBGE)
 
 file1 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/banco_completo"
 banco_completo <- read_delim(file1, delim = ",", 
-                        locale = locale(encoding='UTF-8')) %>% select(-1)
+                        locale = locale(encoding='UTF-8')) %>% select(-1) %>% 
+                        filter(ano_implementacao != 2023 | is.na(ano_implementacao))
 
 file2 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/geo_ufs_2"
 geo_ufs_2 <- read_delim(file2, delim = ",", 
@@ -74,6 +76,7 @@ geo_ufs_2 <- read_delim(file2, delim = ",",
 file3 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/muni_geobr_3"
 muni_geobr_3 <- read_delim(file3, delim = ",", 
                         locale = locale(encoding='latin1'))
+
 
 ```
 
@@ -427,10 +430,13 @@ banco_completo %>%
   ggtitle("Boxplot do Índice de Gini e de Theil") +
   xlab("") +
   ylab("") +
+  labs(caption = "Fonte: IBGE, 2010 
+                  Elaboração Própria") +
   scale_fill_manual(name = "Tarifa Zero?", values = c("#c57d4b", "#7e9563"), labels = c("Não", "Sim"))+ 
   theme_light() + 
     theme(plot.title = element_text(family = "serif", size = 12, face = "bold", hjust = 0.5, colour = "black"),
           strip.background = element_rect(colour = "white", fill = "#579296"),
+          plot.caption = element_text(family = "serif", size = 10),
   strip.text.x = element_text(colour = "White", hjust = 0.5, family = "serif", face = "bold"),
     text = element_text(family = "serif", size = 14),
     axis.text.x=element_blank(),
@@ -452,10 +458,11 @@ Tabela Separandos os valores por UF:
   summarise(media_gini_tf = median(gini), media_theil_tf = median(theil))
 
 
+
 # munic sem ffpt:
 
-  banco_completo %>% 
-  filter(tarifa_zero == "não") %>% 
+ tabela_desigualdade <- banco_completo %>% 
+  filter(tarifa_zero == "não") %>%
   select(regiao, gini, theil) %>% 
   group_by(regiao) %>% 
   summarise(media_gini_geral = median(gini), media_theil_geral = median(theil)) %>% 
@@ -474,6 +481,9 @@ Tabela Separandos os valores por UF:
     columnGroups = list(
     colGroup(name = "Índice de Gini", columns = c("media_gini_tf", "media_gini_geral" )),
     colGroup(name = "Índice de Theil", columns = c("media_theil_geral", "media_theil_tf"))))
+ 
+ tabela_desigualdade %>% 
+     add_source("Fonte: IBGE, 2010", font_size = 12, align = "left", margin = margin(t = 12))  
 
 
 ```
@@ -504,12 +514,15 @@ banco_completo %>%
   xlab("") +
   ylab("") +
   ggtitle("Boxplot do PIB per capta") +
+  labs(caption = "Fonte: IBGE, 2020 
+                  Elaboração Própria") +
   scale_x_continuous(
     labels = scales::label_dollar(prefix = "R$ ",
                                   big.mark = ".")) + 
   scale_fill_manual(name = "Tarifa Zero?", values = c("#c57d4b", "#7e9563"), labels = c("Não", "Sim"))+ 
   theme_light() + 
     theme(plot.title = element_text(family = "serif", size = 12, face = "bold", hjust = 0.5, colour = "black"),
+          plot.caption = element_text(family = "serif", size = 10),
     text = element_text(family = "serif", size = 14),
     axis.text.x=element_blank(),
     axis.text.y=element_text(size = 10, family = "serif"),
@@ -519,6 +532,28 @@ banco_completo %>%
 
 
 ```
+
+```{r}
+
+# Medianas do PIB
+
+media_indice_pib_tf <- banco_completo %>% 
+  filter(tarifa_zero == "sim") %>% 
+  filter(produto_interno_bruto_per_capita_a_precos_correntes_r_1_00 < 150000) %>% 
+  summarize(median(produto_interno_bruto_per_capita_a_precos_correntes_r_1_00)) %>% 
+  round(digits = 3) %>% 
+  pull()
+
+media_indice_pib_geral <- banco_completo %>% 
+  filter(tarifa_zero != "sim") %>% 
+  filter(produto_interno_bruto_per_capita_a_precos_correntes_r_1_00 < 150000) %>% 
+  summarize(median(produto_interno_bruto_per_capita_a_precos_correntes_r_1_00, na.rm = TRUE)) %>% 
+  round(digits = 3) %>% 
+  pull()
+
+
+```
+
 
 
 Tabela Separandos os valores por UF:
@@ -578,9 +613,13 @@ dadosPNADc_brutos <- get_pnadc(year=2017, quarter=4, vars=c("V2009","V4009","V40
 ```{r}
 
 ffpt_orgao <- banco_completo %>% 
-  mutate(caracterizacao_do_orgao_gestor = case_when(caracterizacao_do_orgao_gestor =="Não informou" ~ "Não possui ou não informou",
-                                                      caracterizacao_do_orgao_gestor == "Não possui estrutura" ~ "Não possui ou não informou", 
-                                                      caracterizacao_do_orgao_gestor == "Recusa" ~ "Não possui ou não informou",
+  mutate(caracterizacao_do_orgao_gestor = case_when(caracterizacao_do_orgao_gestor =="Não informou" ~ "Não informou",
+                                                      caracterizacao_do_orgao_gestor == "Não possui estrutura" ~ "Secretaria não exclusiva", 
+                                                      caracterizacao_do_orgao_gestor == "Recusa" ~ "Não informou",
+                                                      caracterizacao_do_orgao_gestor == "Órgão da administração indireta" ~ "Secretaria não exclusiva", 
+                                                      caracterizacao_do_orgao_gestor == "Secretaria em conjunto com outras políticas setoriais"  ~ "Secretaria não exclusiva",
+                                                      caracterizacao_do_orgao_gestor == "Setor subordinado a outra secretaria" ~ "Secretaria não exclusiva",
+                                                      caracterizacao_do_orgao_gestor == "Setor subordinado diretamente à chefia do Executivo"  ~ "Secretaria não exclusiva",
                                                       TRUE~(caracterizacao_do_orgao_gestor))) %>% 
   filter(tarifa_zero == "sim") %>% 
   group_by(caracterizacao_do_orgao_gestor) %>% 
@@ -589,9 +628,13 @@ ffpt_orgao <- banco_completo %>%
   select(-2)
 
 banco_completo %>% 
-  mutate(caracterizacao_do_orgao_gestor = case_when(caracterizacao_do_orgao_gestor =="Não informou" ~ "Não possui ou não informou",
-                                                      caracterizacao_do_orgao_gestor == "Não possui estrutura" ~ "Não possui ou não informou", 
-                                                      caracterizacao_do_orgao_gestor == "Recusa" ~ "Não possui ou não informou",
+  mutate(caracterizacao_do_orgao_gestor = case_when(caracterizacao_do_orgao_gestor =="Não informou" ~ "Não informou",
+                                                      caracterizacao_do_orgao_gestor == "Não possui estrutura" ~ "Secretaria não exclusiva", 
+                                                      caracterizacao_do_orgao_gestor == "Recusa" ~ "Não informou",
+                                                      caracterizacao_do_orgao_gestor == "Órgão da administração indireta" ~ "Secretaria não exclusiva", 
+                                                      caracterizacao_do_orgao_gestor == "Secretaria em conjunto com outras políticas setoriais"  ~ "Secretaria não exclusiva",
+                                                      caracterizacao_do_orgao_gestor == "Setor subordinado a outra secretaria" ~ "Secretaria não exclusiva",
+                                                      caracterizacao_do_orgao_gestor == "Setor subordinado diretamente à chefia do Executivo"  ~ "Secretaria não exclusiva",
                                                       TRUE~(caracterizacao_do_orgao_gestor))) %>% 
   filter(tarifa_zero == "não") %>% 
   group_by(caracterizacao_do_orgao_gestor) %>% 
@@ -601,7 +644,7 @@ banco_completo %>%
   left_join(ffpt_orgao, by = "caracterizacao_do_orgao_gestor") %>% 
   mutate_if(is.numeric, ~replace(., is.na(.), 0)) %>% 
   adorn_pct_formatting(digits = 0) %>% 
-  kbl(col.names = c("Caracterização do orgão gestor", "Cidades sem Tarifa Zero", "Cidades com Tarifa Zero"), caption = "Tabela 1: Caracterização do Orgão Gestor") %>%
+  kbl(col.names = c("Caracterização do orgão gestor", "Cidades sem Tarifa Zero", "Cidades com Tarifa Zero"), caption = "Tabela 11: Caracterização do Orgão Gestor") %>%
   kable_classic(full_width = F , html_font = "Cambria") %>% 
   footnote(general = "IBGE, 2021 ",
            general_title = "Fonte: ", number_title = "Type I: ",
@@ -653,7 +696,7 @@ banco_completo %>%
   left_join(ffpt_escolaridade, by = "escolaridade_do_a_titular_do_orgao_gestor") %>% 
   adorn_pct_formatting(digits = 0) %>% 
 mutate(pct_ffpt = gsub(pattern = "-",replacement = "0%", pct_ffpt)) %>% 
-kbl(col.names = c("Escolaridade", "Cidades sem Tarifa Zero", "Cidades com Tarifa Zero"), caption = "Tabela 2: Escolaridade do Titular do Orgão Gestor") %>%
+kbl(col.names = c("Escolaridade", "Cidades sem Tarifa Zero", "Cidades com Tarifa Zero"), caption = "Tabela 12: Escolaridade do Titular do Orgão Gestor") %>%
 kable_classic(full_width = F , html_font = "Cambria") %>% 
 footnote(general = "IBGE, 2021 ",
            general_title = "Fonte: ", number_title = "Type I: ",
@@ -692,7 +735,7 @@ banco_completo %>%
   select(-2) %>% 
   left_join(ffpt_conselho, by = "conselho_municipal_de_transporte_existencia") %>% 
   adorn_pct_formatting(digits = 0) %>% 
-kbl(col.names = c("Existe Conselho na Cidade?", "Cidades sem Tarifa Zero", "Cidades com Tarifa Zero"), caption = "Tabela 3: Existência de Conselho Municipal de Transporte") %>%
+kbl(col.names = c("Existe Conselho na Cidade?", "Cidades sem Tarifa Zero", "Cidades com Tarifa Zero"), caption = "Tabela 13: Existência de Conselho Municipal de Transporte") %>%
 kable_classic(full_width = F , html_font = "Cambria") %>% 
 footnote(general = "IBGE, 2021 ",
            general_title = "Fonte: ", number_title = "Type I: ",
@@ -729,7 +772,7 @@ banco_completo %>%
   select(-2) %>% 
   left_join(ffpt_fundo, by = "fundo_municipal_de_transporte_existencia") %>% 
   adorn_pct_formatting(digits = 0) %>% 
-kbl(col.names = c("Existe Fundo Municipal?", "Cidades sem Tarifa Zero", "Cidades com Tarifa Zero"), caption = "Tabela 4: Existência de Fundo Municipal de Transporte") %>%
+kbl(col.names = c("Existe Fundo Municipal?", "Cidades sem Tarifa Zero", "Cidades com Tarifa Zero"), caption = "Tabela 14: Existência de Fundo Municipal de Transporte") %>%
 kable_classic(full_width = F, html_font = "Cambria") %>% 
 footnote(general = "IBGE, 2021 ",
            general_title = "Fonte: ", number_title = "Type I: ",
@@ -771,7 +814,7 @@ banco_completo %>%
   select(-2) %>% 
   left_join(ffpt_plano, by = "possui_plano_de_mobilidade_urbana") %>% 
   adorn_pct_formatting(digits = 0) %>% 
-kbl(col.names = c("Existe Plano de Mobilidade Urbana?", "Cidades sem Tarifa Zero", "Cidades com Tarifa Zero"), caption = "Tabela 5: Existência de Plano de Mobilidade Urbana") %>%
+kbl(col.names = c("Existe Plano de Mobilidade Urbana?", "Cidades sem Tarifa Zero", "Cidades com Tarifa Zero"), caption = "Tabela 15: Existência de Plano de Mobilidade Urbana") %>%
 kable_classic(full_width = F, html_font = "Cambria") %>% 
 footnote(general = "IBGE, 2021 ",
            general_title = "Fonte: ", number_title = "Type I: ",
@@ -813,7 +856,7 @@ banco_completo %>%
   left_join(ffpt_ps, by = "prosperidade_social") %>% 
   adorn_pct_formatting(digits = 0) %>% 
   mutate(pct_ffpt = gsub(pattern = "-",replacement = "0%", pct_ffpt)) %>% 
-kbl(col.names = c("Índice de Prosperidade Social", "Cidades sem Tarifa Zero", "Cidades com Tarifa Zero"), caption = "Tabela 6: Índice de Prosperidade Social") %>%
+kbl(col.names = c("Índice de Prosperidade Social", "Cidades sem Tarifa Zero", "Cidades com Tarifa Zero"), caption = "Tabela 16: Índice de Prosperidade Social") %>%
 kable_classic(full_width = F, html_font = "Cambria") %>% 
 footnote(general = "IPEA, 2010",
            general_title = "Fonte: ", number_title = "Type I: ",
@@ -848,8 +891,8 @@ filter(tarifa_zero == "não") %>%
 ungroup() %>% 
 left_join(recursos_humanos_ffpt, by = "name") %>% 
 select(-tarifa_zero) %>% 
-kbl(col.names = c("Regime de Contratação", "Cidades sem Tarifa Zero", "Cidades com Tarifa Zero"), caption = "Tabela 7: Regime de Contratação dos Funcionários da Administração Direta") %>%
-kable_classic(full_width = F , html_font = "Cambria") %>% 
+kbl(col.names = c("Regime de Contratação", "Cidades sem Tarifa Zero", "Cidades com Tarifa Zero"), caption = "Tabela 17: Regime de Contratação dos Funcionários da Administração Direta") %>%
+kable_classic(full_width = F , html_font = "Times New Roman") %>% 
 footnote(general = "IBGE, 2021 ",
            general_title = "Fonte: ", number_title = "Type I: ",
            footnote_as_chunk = T, title_format = c("italic")
@@ -860,6 +903,13 @@ footnote(general = "IBGE, 2021 ",
 ```
 
 
+
+```{r}
+
+
+
+
+```
 
 
 
