@@ -39,9 +39,6 @@ file3 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/d
 munic_transporte <- read_delim(file3, delim = ",", 
                                locale = locale(encoding='latin1')) 
 
-                               
-                               
-
 # Área Territorial dos municípios, IBGE, 2022
 # endereço: https://www.ibge.gov.br/geociencias/organizacao-do-territorio/estrutura-territorial/15761-areas-dos-municipios.html?=&t=downloads
 
@@ -63,6 +60,40 @@ plano_mob <- read_delim(file5, delim = ",",
 file6 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/indice_ipea"
   indice_ipea <- read_delim(file6, delim = ",",
                           locale = locale(encoding='latin1'))
+  
+## Base de dados de estatísticas eleitorais do TSE - Eleições Anteriores
+# Endereço: https://www.tse.jus.br/eleicoes/eleicoes-anteriores 
+  
+  
+  file7 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/votacao_2000"
+  votacao_2000 <- read_delim(file7, delim = ",", 
+                                locale = locale(encoding='latin1'))
+  
+  file8 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/votacao_2004"
+  votacao_2004 <- read_delim(file8, delim = ",", 
+                                locale = locale(encoding='latin1'))
+  
+  file9 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/votacao_2008"
+  votacao_2008 <- read_delim(file9, delim = ",", 
+                                locale = locale(encoding='latin1'))
+  
+  file10 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/votacao_2012"
+  votacao_2012 <- read_delim(file10, delim = ",", 
+                                locale = locale(encoding='latin1'))
+  
+  file11 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/votacao_2016"
+  votacao_2016 <- read_delim(file11, delim = ",", 
+                                locale = locale(encoding='latin1'))
+  
+  file12 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/votacao_2020"
+  votacao_2020 <- read_delim(file12, delim = ",", 
+                                locale = locale(encoding='latin1'))
+  
+  file13 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/tarifa_zero_codigos_tse"
+  tarifa_zero_tse <- read_delim(file13, delim = ",", 
+                             locale = locale(encoding='latin1')) ## cidades com tarifa zero com o código TSE
+  
+
 
 # Todos os seguintes dados foram baixados do pacote R "abjData": Índice de Desenvolvimento Humano Municipal (IDHM), índice de Gini e índice de Theil, IVS municipal, Índice de prosperidade social, População Urbana e Rural, Renda per Capta, % de pobres
 # Os dados do índice de vulnerabilidade econômica foram retirados do site do ipea: http://ivs.ipea.gov.br/index.php/pt/planilha 
@@ -176,47 +207,88 @@ banco_completo <-
 
 # Salvando o banco completo no Github pra ser usado no arquivo Rmarckdown que será usado para o relatório:
 
-write.csv(banco_completo, "banco_completo")
+# write.csv(banco_completo, "banco_completo")
 
-# Baixando dados para o mapa com Geobr 
+## Tratamento dos dados Eleitorais: 
 
-# Download dos Estados e Municípios: 
+dados_Votacao <- bind_rows(votacao_2000, votacao_2004, votacao_2008, votacao_2012, votacao_2016, votacao_2020) %>% 
+  select(3,6, 11, 14, 15, 21, 30, 38) %>% 
+  group_by(ANO_ELEICAO, NM_MUNICIPIO, CD_MUNICIPIO, SG_PARTIDO, NR_TURNO) %>% 
+  summarize(votos_nominais = sum(QT_VOTOS_NOMINAIS)) %>% 
+  ungroup()
 
-muni_geobr_1 <- read_municipality(code_muni="all", year=2018) %>%  as.tibble()
 
-geo_ufs <- read_state(code_state = 'all', year = 2018) %>% as.tibble()
+munic_segundo_turno_usar <- dados_Votação %>%  filter(NR_TURNO == 2) %>% 
+  group_by(ANO_ELEICAO, CD_MUNICIPIO) %>% 
+  mutate(pct = votos_nominais/sum(votos_nominais)*100) %>% 
+  mutate(pct = round(pct, digits = 1)) %>% 
+  ungroup()
 
-geo_ufs %>%  select(geom)
+# Tirar do banco completo o 1° turno dos municipios que tiveram 2° turno
 
-# Estados: 
+munic_segundo_turni_nao_usar <- munic_segundo_turno_usar %>% select (1,3) %>% 
+  group_by(ANO_ELEICAO, CD_MUNICIPIO) %>% 
+  tally() %>% 
+  select(-n)  
 
-munic_isencao_tarifa_uf <- banco_completo %>% 
-  select(uf_x,tarifa_zero) %>% 
-  distinct() %>% 
-  rename(code_state=uf_x)
+# Juntando os municípios com 2° turno
 
-geo_ufs_2 <- geo_ufs  %>% 
-  left_join(munic_isencao_tarifa_uf, by = c("code_state")) %>% 
-  replace(is.na("tarifa_zero"), "não")
+dados_votacao_completo <- dados_Votacao %>% 
+  anti_join(munic_segundo_turni_nao_usar) %>% 
+  group_by(ANO_ELEICAO, CD_MUNICIPIO) %>% 
+  mutate(pct = votos_nominais/sum(votos_nominais)*100) %>% 
+  mutate(pct = round(pct, digits = 1)) %>% 
+  ungroup() %>% 
+  bind_rows(munic_segundo_turno_usar)
 
-# municipios: 
+# Selecionando os eleitos
 
-munic_isencao_tarifa_muni <- banco_completo  %>% 
-  rename(code_muni= cod_munic) %>% 
-  select(code_muni,tarifa_zero) %>% 
-  distinct()
+candidatos_eleitos <- dados_votacao_completo %>%  
+  group_by(ANO_ELEICAO, CD_MUNICIPIO) %>% 
+  slice_max(pct) %>% 
+  mutate(Situacao= "Eleito") %>% 
+  ungroup()
 
-muni_geobr_3 <- muni_geobr_1 %>% 
-  left_join(munic_isencao_tarifa_muni, by = c("code_muni")) %>% 
-  replace(is.na("tarifa_zero"), "não") %>% 
-  st_centroid() %>% 
-  filter(tarifa_zero == "sim") %>% 
-  rename (Municipio = name_muni)
+# Selecionando o 2° colocado  
 
-# Salvando o banco completo no Github pra ser usado no arquivo Rmarckdown que será usado para o relatório:
+candidatos_segundo_lugar <- dados_votacao_completo %>% 
+  anti_join(candidatos_eleitos, by = c("ANO_ELEICAO", "CD_MUNICIPIO", "pct")) %>% 
+  group_by(ANO_ELEICAO, CD_MUNICIPIO) %>% 
+  slice_max(pct) %>% 
+  mutate(Situacao = "Segundo lugar") %>% 
+  ungroup()
 
-write.csv(geo_ufs_2, "geo_ufs_2")
+candidatos_eleitos_1 <- candidatos_eleitos %>% 
+  pivot_wider(names_from = Situacao, values_from = pct)
 
-write.csv(muni_geobr_3, "muni_geobr_3")
+candidatos_segundo_lugar_1 <- candidatos_segundo_lugar %>% 
+  pivot_wider(names_from = Situacao, values_from = pct) 
 
-write.
+# Juntando Candidatos Eleitos e 2° lugar e fazendo o cálculo da diferença entre a % de votos
+
+
+eleicoes <- candidatos_eleitos_1 %>% 
+  left_join(candidatos_segundo_lugar_1, by = c("ANO_ELEICAO", "CD_MUNICIPIO")) %>% 
+  select(1, 2, 3, 4, 5, 7, 9, 12 ) %>% 
+  rename(partido_candidato_eleito = SG_PARTIDO.x, partido_segundo_lugar = SG_PARTIDO.y) %>% 
+  group_by(ANO_ELEICAO, CD_MUNICIPIO) %>% 
+  mutate(diferenca_votos = last(Eleito) - first(`Segundo lugar`)) %>% 
+  ungroup()
+
+# Identificando as cidades com tarifa zero 
+
+cidades_tarifa_zero <- tarifa_zero_tse %>% 
+  select(CD_MUNICIPIO, tarifa_zero) %>% 
+  mutate(CD_MUNICIPIO = as.character(CD_MUNICIPIO)) 
+
+eleicoes %>% 
+  left_join(cidades_tarifa_zero, by = "CD_MUNICIPIO") %>% 
+  filter(CD_MUNICIPIO !=  "79430" | 
+           partido_candidato_eleito != "PMDB" |
+           ANO_ELEICAO != 2008 | 
+           partido_segundo_lugar != "PSDC") %>% 
+  rename(nome_munic = NM_MUNICIPIO.x, turno_eleicao = NR_TURNO.x) %>% 
+  select(CD_MUNICIPIO, nome_munic, ANO_ELEICAO, turno_eleicao, tarifa_zero, 
+         partido_candidato_eleito, partido_segundo_lugar, Eleito, `Segundo lugar`, diferenca_votos)
+
+
