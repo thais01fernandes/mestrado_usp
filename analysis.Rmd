@@ -906,6 +906,33 @@ footnote(general = "IBGE, 2021 ",
 
 ```{r}
 
+votacao_2000 <- read_delim("votacao_2000.csv", 
+    delim = ";", escape_double = FALSE, locale = locale(encoding = "Latin1", 
+        asciify = TRUE), trim_ws = TRUE) %>% filter(DS_CARGO == "Prefeito")
+
+
+votacao_2004 <- read_delim("votacao_2004.csv", 
+    delim = ";", escape_double = FALSE, locale = locale(encoding = "Latin1", 
+        asciify = TRUE), trim_ws = TRUE) %>% filter(DS_CARGO == "Prefeito")
+
+
+votacao_2008 <- read_delim("votacao_2008.csv", 
+    delim = ";", escape_double = FALSE, locale = locale(encoding = "Latin1", 
+        asciify = TRUE), trim_ws = TRUE) %>% filter(DS_CARGO == "Prefeito")
+
+votacao_2012 <- read_delim("votacao_2012.csv", 
+    delim = ";", escape_double = FALSE, locale = locale(encoding = "Latin1", 
+        asciify = TRUE), trim_ws = TRUE) %>% filter(DS_CARGO == "Prefeito")
+
+
+votacao_2016 <- read_delim("votacao_2016.csv", 
+    delim = ";", escape_double = FALSE, locale = locale(encoding = "Latin1", 
+        asciify = TRUE), trim_ws = TRUE) %>% filter(DS_CARGO == "Prefeito")
+
+
+votacao_2020 <- read_delim("votacao_2020.csv", 
+    delim = ";", escape_double = FALSE, locale = locale(encoding = "Latin1", 
+        asciify = TRUE), trim_ws = TRUE) %>% filter(DS_CARGO == "Prefeito")  
 
 
 
@@ -913,10 +940,96 @@ footnote(general = "IBGE, 2021 ",
 
 
 
+```{r}
+
+dados_Votacao <- bind_rows(votacao_2000, votacao_2004, votacao_2008, votacao_2012, votacao_2016, votacao_2020) %>% 
+   select(3,6, 11, 14, 15, 21, 30, 38) %>% 
+  group_by(ANO_ELEICAO, NM_MUNICIPIO, CD_MUNICIPIO, SG_PARTIDO, NR_TURNO) %>% 
+  summarize(votos_nominais = sum(QT_VOTOS_NOMINAIS)) %>% 
+  ungroup()
+ 
+
+munic_segundo_turno_usar <- dados_Votação %>%  filter(NR_TURNO == 2) %>% 
+  group_by(ANO_ELEICAO, CD_MUNICIPIO) %>% 
+  mutate(pct = votos_nominais/sum(votos_nominais)*100) %>% 
+  mutate(pct = round(pct, digits = 1)) %>% 
+  ungroup()
+
+# Tirar do banco completo o 1° turno dos municipios que tiveram 2° turno
+
+munic_segundo_turni_nao_usar <- munic_segundo_turno_usar %>% select (1,3) %>% 
+  group_by(ANO_ELEICAO, CD_MUNICIPIO) %>% 
+  tally() %>% 
+  select(-n)  
+
+# Juntando os municípios com 2° turno
+  
+dados_votacao_completo <- dados_Votacao %>% 
+  anti_join(munic_segundo_turni_nao_usar) %>% 
+  group_by(ANO_ELEICAO, CD_MUNICIPIO) %>% 
+  mutate(pct = votos_nominais/sum(votos_nominais)*100) %>% 
+  mutate(pct = round(pct, digits = 1)) %>% 
+  ungroup() %>% 
+  bind_rows(munic_segundo_turno_usar)
+
+```
 
 
+```{r}
+
+# Selecionando os eleitos
+
+candidatos_eleitos <- dados_votacao_completo %>%  
+  group_by(ANO_ELEICAO, CD_MUNICIPIO) %>% 
+  slice_max(pct) %>% 
+  mutate(Situacao= "Eleito") %>% 
+  ungroup()
+ 
+# Selecionando o 2° colocado  
+  
+candidatos_segundo_lugar <- dados_votacao_completo %>% 
+  anti_join(candidatos_eleitos, by = c("ANO_ELEICAO", "CD_MUNICIPIO", "pct")) %>% 
+  group_by(ANO_ELEICAO, CD_MUNICIPIO) %>% 
+  slice_max(pct) %>% 
+  mutate(Situacao = "Segundo lugar") %>% 
+  ungroup()
+
+candidatos_eleitos_1 <- candidatos_eleitos %>% 
+  pivot_wider(names_from = Situacao, values_from = pct)
+
+candidatos_segundo_lugar_1 <- candidatos_segundo_lugar %>% 
+  pivot_wider(names_from = Situacao, values_from = pct) 
+
+# Juntando Candidatos Eleitos e 2° lugar e fazendo o cálculo da diferença entre a % de votos
 
 
+eleicoes <- candidatos_eleitos_1 %>% 
+  left_join(candidatos_segundo_lugar_1, by = c("ANO_ELEICAO", "CD_MUNICIPIO")) %>% 
+  select(1, 2, 3, 4, 5, 7, 9, 12 ) %>% 
+  rename(partido_candidato_eleito = SG_PARTIDO.x, partido_segundo_lugar = SG_PARTIDO.y) %>% 
+  group_by(ANO_ELEICAO, CD_MUNICIPIO) %>% 
+  mutate(diferenca_votos = last(Eleito) - first(`Segundo lugar`)) %>% 
+  ungroup()
+  
+# Identificando as cidades com tarifa zero 
 
+cidades_tarifa_zero <- banco_completo %>% 
+  filter(tarifa_zero == "sim") %>% 
+  select(cod_munic, tarifa_zero) %>% 
+  rename(CD_MUNICIPIO = cod_munic) %>% 
+  mutate(CD_MUNICIPIO = as.character(CD_MUNICIPIO)) %>% 
+  mutate(CD_MUNICIPIO = str_sub(CD_MUNICIPIO, start = 3))
+
+votacao_2008 %>% 
+left_join(cidades_tarifa_zero, by = "CD_MUNICIPIO") %>% 
+  filter(tarifa_zero == "sim")
+  
+# Checando quantos muncípios tem em cada base 
+
+votacao_2020 %>% select(CD_MUNICIPIO) %>% 
+  filter(CD_MUNICIPIO == "50308")
+
+
+```
 
 
