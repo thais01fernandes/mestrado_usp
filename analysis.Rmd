@@ -68,14 +68,9 @@ banco_completo <- read_delim(file1, delim = ",",
                         locale = locale(encoding='UTF-8')) %>% select(-1) %>% 
                         filter(ano_implementacao != 2023 | is.na(ano_implementacao))
 
-file2 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/geo_ufs_2"
-geo_ufs_2 <- read_delim(file2, delim = ",", 
-                        locale = locale(encoding='latin1')) 
-
-
-file3 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/muni_geobr_3"
-muni_geobr_3 <- read_delim(file3, delim = ",", 
-                        locale = locale(encoding='latin1'))
+file2 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/eleicoes_1"
+  eleicoes <- read_delim(file2, delim = ",", 
+                             locale = locale(encoding='UTF-8')) %>% select(-1) 
 
 
 ```
@@ -167,6 +162,47 @@ order to undertand why this policy was implemented.
 
 The map below shows us the location of the cities, the points represent
 the municipalities:
+
+```{r eval=FALSE, include=FALSE}
+
+# Baixando dados para o mapa com Geobr 
+
+# Download dos Estados e Municípios: 
+
+muni_geobr_1 <- read_municipality(code_muni="all", year=2018) %>%  as.tibble()
+
+geo_ufs <- read_state(code_state = 'all', year = 2018) %>% as.tibble()
+
+geo_ufs %>%  select(geom)
+
+# Estados: 
+
+munic_isencao_tarifa_uf <- banco_completo %>% 
+  select(uf_x,tarifa_zero) %>% 
+  distinct() %>% 
+  rename(code_state=uf_x)
+
+geo_ufs_2 <- geo_ufs  %>% 
+  left_join(munic_isencao_tarifa_uf, by = c("code_state")) %>% 
+  replace(is.na("tarifa_zero"), "não")
+
+# municipios: 
+
+munic_isencao_tarifa_muni <- banco_completo  %>% 
+  rename(code_muni= cod_munic) %>% 
+  select(code_muni,tarifa_zero) %>% 
+  distinct()
+
+muni_geobr_3 <- muni_geobr_1 %>% 
+  left_join(munic_isencao_tarifa_muni, by = c("code_muni")) %>% 
+  replace(is.na("tarifa_zero"), "não") %>% 
+  st_centroid() %>% 
+  filter(tarifa_zero == "sim") %>% 
+  rename (Municipio = name_muni)
+
+
+```
+
 
 ```{r Mapa dos municipios, fig.align = 'center', out.width = "90%"}
 
@@ -286,7 +322,7 @@ tarifa_zero <- ffpt_muni_5 %>% filter(tarifa_zero == "sim") %>% select(latitude,
   mutate_if(is.numeric, ~replace(., is.na(.), 0)) %>% 
   filter(!is.na(classe_pop)) %>% 
   mutate(tarifa_zero = case_when(tarifa_zero == "sim" ~ "Municípios com Tarifa Zero", 
-                                 tarifa_zero == "não"~ "Municípios sem Tarifa Zero", TRUE ~ tarifa_zero)) %>% 
+                                 tarifa_zero == "nao"~ "Municípios sem Tarifa Zero", TRUE ~ tarifa_zero)) %>% 
   ggplot() +
   geom_col(aes(x = reorder(classe_pop, pct), y =  pct, fill = tarifa_zero), width = 1,colour="white", alpha = 0.6) + 
   xlab("") +
@@ -418,13 +454,29 @@ two indexes for all the municipalities with a Tarifa Zero:
 
 ```{r Gráfico GINI e Theil 1, fig.align = 'center', out.width = "70%", dpi=300}
 
+
+# Labels: 
+
+label_gini_theil <- banco_completo %>% 
+    pivot_longer(cols = c("gini", "theil")) %>%
+    mutate(name = case_when(
+    name == "gini" ~ "Gini",
+    name == "theil" ~ "Theil-L")) %>% 
+    group_by(name, tarifa_zero) %>% 
+    summarise(value = median(value, na.rm = TRUE))
+
+# Gráficos
+
+
 banco_completo %>% 
  pivot_longer(cols = c("gini", "theil")) %>%
   mutate(name = case_when(
     name == "gini" ~ "Gini",
     name == "theil" ~ "Theil-L")) %>% 
     ggplot() +
-    geom_boxplot(aes(x = tarifa_zero, y = value, fill = tarifa_zero), colour="black", alpha = 0.9) + 
+    geom_boxplot(aes(x = tarifa_zero, y = value, fill = tarifa_zero), colour="black", alpha = 0.9) +
+    geom_label(data = label_gini_theil, aes(tarifa_zero, value, label = value), 
+              vjust = 0.5, size = 3) + 
   facet_wrap(~name) +
   theme_light() +
   ggtitle("Boxplot do Índice de Gini e de Theil") +
@@ -503,21 +555,32 @@ retirar os valores discrepantes da análise e torná-la mais evidente.
 ```{r PIB Gráfico, fig.align = 'center', out.width = "70%", dpi=300}
 
 
+# labels: 
+
+label_pib <- banco_completo %>% 
+  rename(pib_per_capta = produto_interno_bruto_per_capita_a_precos_correntes_r_1_00) %>% 
+  filter(pib_per_capta < 150000) %>% 
+  group_by(tarifa_zero) %>% 
+  summarise(pib_per_capta = median(pib_per_capta)) %>% 
+  mutate(pib_per_capta = round(pib_per_capta))
+
+
 # Gráfico
 
 banco_completo %>% 
   rename(pib_per_capta = produto_interno_bruto_per_capita_a_precos_correntes_r_1_00) %>% 
   filter(pib_per_capta < 150000) %>% 
   ggplot() +
-  geom_boxplot(aes(x = pib_per_capta, fill = tarifa_zero), colour="black", alpha = 0.9) + 
+  geom_boxplot(aes(x = tarifa_zero, y = pib_per_capta, fill = tarifa_zero), colour="black", alpha = 0.9) + 
+  geom_label(data = label_pib, aes(x = tarifa_zero, y = pib_per_capta, label = scales::dollar(prefix = "R$ ", round(pib_per_capta, 1))), size = 3) +
   theme_light() +
   xlab("") +
   ylab("") +
   ggtitle("Boxplot do PIB per capta") +
   labs(caption = "Fonte: IBGE, 2020 
                   Elaboração Própria") +
-  scale_x_continuous(
-    labels = scales::label_dollar(prefix = "R$ ",
+  scale_y_continuous(
+  labels = scales::label_dollar(prefix = "R$ ",
                                   big.mark = ".")) + 
   scale_fill_manual(name = "Tarifa Zero?", values = c("#c57d4b", "#7e9563"), labels = c("Não", "Sim"))+ 
   theme_light() + 
@@ -526,8 +589,7 @@ banco_completo %>%
     text = element_text(family = "serif", size = 14),
     axis.text.x=element_blank(),
     axis.text.y=element_text(size = 10, family = "serif"),
-    legend.position = "bottom")+ 
-  coord_flip() 
+    legend.position = "bottom")
 
 
 
@@ -604,6 +666,57 @@ dadosPNADc_brutos <- get_pnadc(year=2017, quarter=4, vars=c("V2009","V4009","V40
 
 ```
 
+**4° premissa** Quanto maior a competitividade das eleições anteriores a adoção da política maior a pressão do eleitor mediano por políticas sociais. Se essa premissa for verdadeira, esperamos encontrar menor diferença média na quantidade de votos recebidos pelo prefeito e o candidato em 2° lugar nas eleições anteriores à adoção da política nas cidades com tarifa zero 
+
+
+
+```{r}
+
+
+eleicoes %>% 
+  group_by(tarifa_zero) %>% 
+  mutate(tarifa_zero = case_when(tarifa_zero == "sim" ~ "sim", 
+                                 TRUE ~ "nao")) %>% 
+  summarize(mediana = median(diferenca_votos, na.rm  = TRUE))
+
+```
+
+
+```{r}
+
+mediana_diferenca_votos <- eleicoes %>% 
+  group_by(tarifa_zero) %>% 
+  mutate(tarifa_zero = case_when(tarifa_zero == "sim" ~ "sim", 
+                                 TRUE ~ "não")) %>% 
+  summarize(diferenca_votos = median(diferenca_votos, na.rm  = TRUE))
+
+eleicoes %>% 
+  mutate(tarifa_zero = case_when(tarifa_zero == "sim" ~ "sim", 
+                                 TRUE ~ "não")) %>% 
+ ggplot() +
+ geom_boxplot(aes(x = tarifa_zero, y = diferenca_votos, fill = tarifa_zero), colour="black", alpha = 0.9) + 
+ geom_label(data = mediana_diferenca_votos, aes(tarifa_zero, diferenca_votos, label = diferenca_votos), 
+              vjust = 0.005, size = 3, 
+              colour = "#394B41", fill = "beige", face = "bold") + 
+  theme_light() +
+  ggtitle("Boxplot das diferenças de votos entre o candidato eleito e segundo colocado") +
+  xlab("") +
+  ylab("") +
+  labs(caption = "Fonte: TSE, 
+                  Elaboração Própria") +
+  scale_fill_manual(name = "Tarifa Zero?", values = c("#c57d4b", "#7e9563"), labels = c("Não", "Sim")) + 
+  theme_light() + 
+    theme(plot.title = element_text(family = "serif", size = 12, face = "bold", hjust = 0.5, colour = "black"),
+          strip.background = element_rect(colour = "white", fill = "#579296"),
+          plot.caption = element_text(family = "serif", size = 10),
+  strip.text.x = element_text(colour = "White", hjust = 0.5, family = "serif", face = "bold"),
+    text = element_text(family = "serif", size = 14),
+    axis.text.x=element_blank(),
+    axis.text.y=element_text(size = 10, family = "serif"),
+    legend.position = "bottom")
+
+
+```
 
 ## 2. Teoria das Capacidades Estatais 
 
@@ -902,134 +1015,5 @@ footnote(general = "IBGE, 2021 ",
 
 ```
 
-
-
-```{r}
-
-votacao_2000 <- read_delim("votacao_2000.csv", 
-    delim = ";", escape_double = FALSE, locale = locale(encoding = "Latin1", 
-        asciify = TRUE), trim_ws = TRUE) %>% filter(DS_CARGO == "Prefeito")
-
-
-votacao_2004 <- read_delim("votacao_2004.csv", 
-    delim = ";", escape_double = FALSE, locale = locale(encoding = "Latin1", 
-        asciify = TRUE), trim_ws = TRUE) %>% filter(DS_CARGO == "Prefeito")
-
-
-votacao_2008 <- read_delim("votacao_2008.csv", 
-    delim = ";", escape_double = FALSE, locale = locale(encoding = "Latin1", 
-        asciify = TRUE), trim_ws = TRUE) %>% filter(DS_CARGO == "Prefeito")
-
-votacao_2012 <- read_delim("votacao_2012.csv", 
-    delim = ";", escape_double = FALSE, locale = locale(encoding = "Latin1", 
-        asciify = TRUE), trim_ws = TRUE) %>% filter(DS_CARGO == "Prefeito")
-
-
-votacao_2016 <- read_delim("votacao_2016.csv", 
-    delim = ";", escape_double = FALSE, locale = locale(encoding = "Latin1", 
-        asciify = TRUE), trim_ws = TRUE) %>% filter(DS_CARGO == "Prefeito")
-
-
-votacao_2020 <- read_delim("votacao_2020.csv", 
-    delim = ";", escape_double = FALSE, locale = locale(encoding = "Latin1", 
-        asciify = TRUE), trim_ws = TRUE) %>% filter(DS_CARGO == "Prefeito")  
-
-
-
-```
-
-
-
-```{r}
-
-dados_Votacao <- bind_rows(votacao_2000, votacao_2004, votacao_2008, votacao_2012, votacao_2016, votacao_2020) %>% 
-   select(3,6, 11, 14, 15, 21, 30, 38) %>% 
-  group_by(ANO_ELEICAO, NM_MUNICIPIO, CD_MUNICIPIO, SG_PARTIDO, NR_TURNO) %>% 
-  summarize(votos_nominais = sum(QT_VOTOS_NOMINAIS)) %>% 
-  ungroup()
- 
-
-munic_segundo_turno_usar <- dados_Votação %>%  filter(NR_TURNO == 2) %>% 
-  group_by(ANO_ELEICAO, CD_MUNICIPIO) %>% 
-  mutate(pct = votos_nominais/sum(votos_nominais)*100) %>% 
-  mutate(pct = round(pct, digits = 1)) %>% 
-  ungroup()
-
-# Tirar do banco completo o 1° turno dos municipios que tiveram 2° turno
-
-munic_segundo_turni_nao_usar <- munic_segundo_turno_usar %>% select (1,3) %>% 
-  group_by(ANO_ELEICAO, CD_MUNICIPIO) %>% 
-  tally() %>% 
-  select(-n)  
-
-# Juntando os municípios com 2° turno
-  
-dados_votacao_completo <- dados_Votacao %>% 
-  anti_join(munic_segundo_turni_nao_usar) %>% 
-  group_by(ANO_ELEICAO, CD_MUNICIPIO) %>% 
-  mutate(pct = votos_nominais/sum(votos_nominais)*100) %>% 
-  mutate(pct = round(pct, digits = 1)) %>% 
-  ungroup() %>% 
-  bind_rows(munic_segundo_turno_usar)
-
-```
-
-
-```{r}
-
-# Selecionando os eleitos
-
-candidatos_eleitos <- dados_votacao_completo %>%  
-  group_by(ANO_ELEICAO, CD_MUNICIPIO) %>% 
-  slice_max(pct) %>% 
-  mutate(Situacao= "Eleito") %>% 
-  ungroup()
- 
-# Selecionando o 2° colocado  
-  
-candidatos_segundo_lugar <- dados_votacao_completo %>% 
-  anti_join(candidatos_eleitos, by = c("ANO_ELEICAO", "CD_MUNICIPIO", "pct")) %>% 
-  group_by(ANO_ELEICAO, CD_MUNICIPIO) %>% 
-  slice_max(pct) %>% 
-  mutate(Situacao = "Segundo lugar") %>% 
-  ungroup()
-
-candidatos_eleitos_1 <- candidatos_eleitos %>% 
-  pivot_wider(names_from = Situacao, values_from = pct)
-
-candidatos_segundo_lugar_1 <- candidatos_segundo_lugar %>% 
-  pivot_wider(names_from = Situacao, values_from = pct) 
-
-# Juntando Candidatos Eleitos e 2° lugar e fazendo o cálculo da diferença entre a % de votos
-
-
-eleicoes <- candidatos_eleitos_1 %>% 
-  left_join(candidatos_segundo_lugar_1, by = c("ANO_ELEICAO", "CD_MUNICIPIO")) %>% 
-  select(1, 2, 3, 4, 5, 7, 9, 12 ) %>% 
-  rename(partido_candidato_eleito = SG_PARTIDO.x, partido_segundo_lugar = SG_PARTIDO.y) %>% 
-  group_by(ANO_ELEICAO, CD_MUNICIPIO) %>% 
-  mutate(diferenca_votos = last(Eleito) - first(`Segundo lugar`)) %>% 
-  ungroup()
-  
-# Identificando as cidades com tarifa zero 
-
-cidades_tarifa_zero <- banco_completo %>% 
-  filter(tarifa_zero == "sim") %>% 
-  select(cod_munic, tarifa_zero) %>% 
-  rename(CD_MUNICIPIO = cod_munic) %>% 
-  mutate(CD_MUNICIPIO = as.character(CD_MUNICIPIO)) %>% 
-  mutate(CD_MUNICIPIO = str_sub(CD_MUNICIPIO, start = 3))
-
-votacao_2008 %>% 
-left_join(cidades_tarifa_zero, by = "CD_MUNICIPIO") %>% 
-  filter(tarifa_zero == "sim")
-  
-# Checando quantos muncípios tem em cada base 
-
-votacao_2020 %>% select(CD_MUNICIPIO) %>% 
-  filter(CD_MUNICIPIO == "50308")
-
-
-```
 
 

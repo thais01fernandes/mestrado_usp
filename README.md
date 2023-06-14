@@ -36,7 +36,7 @@ Este trabalho de mestrado é uma análise exploratória a respeito da adoção d
 
 10. [Dados espaciais oficiais - Pacote Geobr](https://github.com/ipeaGIT/geobr)
 
-11. [Base de dados de estatísticas eleitorais do TSE - Eleições Anteriores](https://www.tse.jus.br/eleicoes/eleicoes-anteriores )
+11. [Base de dados de estatísticas eleitorais do TSE - Eleições Anteriores](https://www.tse.jus.br/eleicoes/eleicoes-anteriores)
 
 
 ## Municípios Entrevistados para Análise Qualitativa 

@@ -291,4 +291,6 @@ eleicoes %>%
   select(CD_MUNICIPIO, nome_munic, ANO_ELEICAO, turno_eleicao, tarifa_zero, 
          partido_candidato_eleito, partido_segundo_lugar, Eleito, `Segundo lugar`, diferenca_votos)
 
+# Salvando o banco de dados no Git hub: 
 
+# write.csv(eleicoes, "eleicoes")
