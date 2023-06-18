@@ -29,7 +29,7 @@ editor_options:
 
 ```{r Pacotes}
 
-
+library("ggpubr")
 library("tidyverse")
 library("kableExtra")
 library("knitr")
@@ -1014,6 +1014,217 @@ footnote(general = "IBGE, 2021 ",
 
 
 ```
+
+
+## 1.Análise da Difusão de Políticas Publicas 
+
+**1° premissa:**Verificar o padrão de difusão nas cidades que se sabe o ano da implementação - Políticas sociais primeiro se espalham na região onde surgiram e depois vão se difundindo para outras partes do país. Dessa forma, esperamos encontrar um padrão de difusão. 
+
+
+```{r}
+
+difusao <- tibble(periodo=c("Anos 90", "Entre 2001 e 2009", "Entre 2001 e 2009", "Entre 2001 e 2009", "Entre 2010 e 2015", "Entre 2010 e 2015", "Entre 2010 e 2015", "Entre 2010 e 2015", "Entre 2016 e 2020", "Entre 2016 e 2020", "Entre 2016 e 2020", "Entre 2016 e 2020",  "Entre 2021 e 2022", "Entre 2021 e 2022", "Entre 2021 e 2022", "Entre 2021 e 2022"),
+       regiao=c("Sudeste", "Centro-Oeste", "Sudeste", "Sul", "Centro-Oeste", "Nordeste", "Sudeste", "Sul", "Nordeste", "Sudeste", "Sul", "Centro-Oeste", "Centro-Oeste", "Nordeste", "Sudeste", "Sul"),
+       n=c(3 ,1, 7, 3, 2, 1, 12, 4, 2, 21, 6, 2,  4, 3, 38, 11))
+
+difusao %>% 
+  mutate(periodo = factor(periodo, levels = c("Anos 90", 
+                                                                          "Entre 2001 e 2009", 
+                                                                          "Entre 2010 e 2015", 
+                                                                          "Entre 2016 e 2020",
+                                                                          "Entre 2021 e 2022", ordered = T))) %>% 
+  ggplot() + 
+  geom_col(aes(x = periodo, y = n, fill = regiao), color = "darkgray") + 
+   theme_light() +
+  ggtitle("Padrão de difusão da Tarifa Zero entre as regiões brasileiras") +
+  xlab("") +
+  ylab("") +
+  labs(caption = "Elaboração Própria") +
+  scale_fill_manual(name = "Região:", values = c("#4b895a", "#b16673", "#4e8397", "#c57d4b"), labels = c("Centro-Oeste", "Nordeste", "Sudeste", "Sul")) + 
+  theme_light() + 
+  geom_text(aes(x = periodo, y =n, label = n, group = regiao), size = 3, position = position_stack(vjust = 0.3)) +
+    theme(plot.title = element_text(family = "serif", size = 12, face = "bold", hjust = 0.5, colour = "black"),
+          strip.background = element_rect(colour = "white", fill = "#579296"),
+          plot.caption = element_text(family = "serif", size = 10),
+  strip.text.x = element_text(colour = "White", hjust = 0.5, family = "serif", face = "bold"),
+    text = element_text(family = "serif", size = 14),
+    axis.text.y= element_blank(),
+    legend.position = "bottom")
+
+  
+
+
+```
+
+**2° premissa:** Verificar se as cidades que implementaram primeiro são maiores do que aquelas que adotaram depois, dessa forma pode-se observar se houve imitação de cidades menores em relação às maiores
+
+
+```{r include=FALSE}
+
+regiao_nordeste <- banco_completo %>% 
+  filter(tarifa_zero == "sim") %>% 
+  select(regiao, ano_implementacao, populacao_estimada) %>% 
+  group_by(ano_implementacao, regiao, populacao_estimada) %>% 
+  arrange(regiao) %>% 
+  mutate(ano_implementacao = as.character(ano_implementacao)) %>% 
+  ungroup() %>% 
+  filter(regiao == " Nordeste") %>% 
+  ggplot() + 
+  geom_point(aes(x = ano_implementacao, y = populacao_estimada), color = "#579296", size = 4) + 
+  geom_text_repel(aes(x = ano_implementacao, y = populacao_estimada, label = scales::dollar(prefix = " ", round(populacao_estimada, 1))), size = 3, hjust = 0.5, vjust = 1.5,point.padding = 0.5) +   
+   theme_light() +
+  ggtitle("Região: Nordeste") +
+  xlab("") +
+  ylab("") +
+  # labs(caption = "Fonte: IBGE, 2021 
+  #                 Elaboração Própria") +
+  theme_light() + 
+    theme(plot.title = element_text(family = "serif", size = 12, face = "bold", hjust = 0.5, colour = "black"),
+          strip.background = element_rect(colour = "white", fill = "#579296"),
+          plot.caption = element_text(family = "serif", size = 10),
+  strip.text.x = element_text(colour = "White", hjust = 0.5, family = "serif", face = "bold"),
+    text = element_text(family = "serif", size = 14),
+    axis.text.y=element_blank(),
+    axis.text.x=element_text(size = 11, family = "serif"),
+    legend.position = "bottom")
+  
+
+  
+
+
+```
+
+
+```{r include=FALSE}
+
+regiao_centro_oeste <- banco_completo %>% 
+  filter(tarifa_zero == "sim") %>% 
+  select(regiao, ano_implementacao, populacao_estimada) %>% 
+  group_by(ano_implementacao, regiao, populacao_estimada) %>% 
+  arrange(regiao) %>% 
+  mutate(ano_implementacao = as.character(ano_implementacao)) %>% 
+  ungroup() %>% 
+  filter(regiao == " Centro-Oeste") %>% 
+  ggplot() + 
+  geom_point(aes(x = ano_implementacao, y = populacao_estimada), color = "#579296", size = 4) + 
+  geom_text_repel(aes(x = ano_implementacao, y = populacao_estimada, label = scales::dollar(prefix = " ", round(populacao_estimada, 1))), size = 3, hjust = 0.5, vjust = 1.5,point.padding = 0.5) +
+  theme_light() +
+  ggtitle("Região: Centro-Oeste") +
+  xlab("") +
+  ylab("") +
+  # labs(caption = "Fonte: IBGE, 2021 
+  #                 Elaboração Própria") +
+  theme_light() + 
+    theme(plot.title = element_text(family = "serif", size = 12, face = "bold", hjust = 0.5, colour = "black"),
+          strip.background = element_rect(colour = "white", fill = "#579296"),
+          plot.caption = element_text(family = "serif", size = 10),
+  strip.text.x = element_text(colour = "White", hjust = 0.5, family = "serif", face = "bold"),
+    text = element_text(family = "serif", size = 14),
+    axis.text.y=element_blank(),
+    axis.text.x=element_text(size = 11, family = "serif"),
+    legend.position = "bottom")
+  
+
+
+```
+
+```{r}
+
+
+regiao_sul <- banco_completo %>% 
+  filter(tarifa_zero == "sim") %>% 
+  select(regiao, ano_implementacao, populacao_estimada) %>% 
+  group_by(ano_implementacao, regiao, populacao_estimada) %>% 
+  arrange(regiao) %>% 
+  mutate(ano_implementacao = as.character(ano_implementacao)) %>% 
+  ungroup() %>% 
+  filter(regiao == " Sul") %>% 
+  ggplot() + 
+  geom_point(aes(x = ano_implementacao, y = populacao_estimada), color = "#579296", size = 4) + 
+  geom_text_repel(aes(x = ano_implementacao, y = populacao_estimada, label = scales::dollar(prefix = " ", round(populacao_estimada, 1))), size = 3, hjust = 0.5, vjust = 1.5,point.padding = 0.5) +
+   theme_light() +
+  ggtitle("Região: Sul") +
+  xlab("") +
+  ylab("") +
+  # labs(caption = "Fonte: IBGE, 2021 
+  #                 Elaboração Própria") +
+  theme_light() + 
+    theme(plot.title = element_text(family = "serif", size = 12, face = "bold", hjust = 0.5, colour = "black"),
+          strip.background = element_rect(colour = "white", fill = "#579296"),
+          plot.caption = element_text(family = "serif", size = 10),
+  strip.text.x = element_text(colour = "White", hjust = 0.5, family = "serif", face = "bold"),
+    text = element_text(family = "serif", size = 14),
+    axis.text.y=element_blank(),
+    axis.text.x=element_text(size = 11, family = "serif"),
+    legend.position = "bottom")
+
+
+
+```
+
+```{r}
+
+regiao_sudeste <- banco_completo %>% 
+  filter(tarifa_zero == "sim") %>% 
+  select(regiao, ano_implementacao, populacao_estimada) %>% 
+  group_by(ano_implementacao, regiao, populacao_estimada) %>% 
+  arrange(regiao) %>% 
+  mutate(ano_implementacao = as.character(ano_implementacao)) %>% 
+  ungroup() %>% 
+  filter(regiao == " Sudeste") %>% 
+  filter(ano_implementacao != 2021 & ano_implementacao != 2022) %>% 
+  ggplot() + 
+  geom_point(aes(x = ano_implementacao, y = populacao_estimada), color = "#579296", size = 4) + 
+  geom_text_repel(aes(x = ano_implementacao, y = populacao_estimada, label = scales::dollar(prefix = " ", round(populacao_estimada, 1))), size = 3, hjust = 0.5, vjust = 1.5,point.padding = 0.5) + 
+   theme_light() +
+  ggtitle("Região: Sudeste") +
+  xlab("") +
+  ylab("") +
+  # labs(caption = "Fonte: IBGE, 2021 
+  #                 Elaboração Própria") +
+  theme_light() + 
+    theme(plot.title = element_text(family = "serif", size = 12, face = "bold", hjust = 0.5, colour = "black"),
+          strip.background = element_rect(colour = "white", fill = "#579296"),
+          plot.caption = element_text(family = "serif", size = 10),
+  strip.text.x = element_text(colour = "White", hjust = 0.5, family = "serif", face = "bold"),
+    text = element_text(family = "serif", size = 14),
+    axis.text.y=element_blank(),
+    axis.text.x=element_text(size = 11, family = "serif"),
+    legend.position = "bottom")
+regiao_sudeste
+
+```
+
+
+
+```{r}
+
+
+ggarrange(regiao_centro_oeste, regiao_nordeste, 
+                                 ncol = 1, nrow = 2)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
