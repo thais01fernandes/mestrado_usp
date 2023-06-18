@@ -1016,7 +1016,7 @@ footnote(general = "IBGE, 2021 ",
 ```
 
 
-## 1.Análise da Difusão de Políticas Publicas 
+## 3.Análise da Difusão de Políticas Publicas 
 
 **1° premissa:**Verificar o padrão de difusão nas cidades que se sabe o ano da implementação - Políticas sociais primeiro se espalham na região onde surgiram e depois vão se difundindo para outras partes do país. Dessa forma, esperamos encontrar um padrão de difusão. 
 
@@ -1131,7 +1131,7 @@ regiao_centro_oeste <- banco_completo %>%
 ```{r}
 
 
-regiao_sul <- banco_completo %>% 
+banco_completo %>% 
   filter(tarifa_zero == "sim") %>% 
   select(regiao, ano_implementacao, populacao_estimada) %>% 
   group_by(ano_implementacao, regiao, populacao_estimada) %>% 
