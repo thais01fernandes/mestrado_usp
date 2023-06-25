@@ -29,6 +29,8 @@ editor_options:
 
 ```{r Pacotes}
 
+
+
 library("ggpubr")
 library("tidyverse")
 library("kableExtra")
@@ -1172,7 +1174,7 @@ regiao_sudeste <- banco_completo %>%
   mutate(ano_implementacao = as.character(ano_implementacao)) %>% 
   ungroup() %>% 
   filter(regiao == " Sudeste") %>% 
-  filter(ano_implementacao != 2021 & ano_implementacao != 2022) %>% 
+#  filter(ano_implementacao != 2021 & ano_implementacao != 2022) %>% 
   ggplot() + 
   geom_point(aes(x = ano_implementacao, y = populacao_estimada), color = "#579296", size = 4) + 
   geom_text_repel(aes(x = ano_implementacao, y = populacao_estimada, label = scales::dollar(prefix = " ", round(populacao_estimada, 1))), size = 3, hjust = 0.5, vjust = 1.5,point.padding = 0.5) + 
@@ -1206,8 +1208,46 @@ ggarrange(regiao_centro_oeste, regiao_nordeste,
 ```
 
 
+## 2. Teoria dos Multilplos Fluxos 
+
+**1° premissa:**Verificar a proximidade temporal entre debate nacional (2013) e adoção da tarifa zero pelos municípios e se nas entrevistas esses eventos são citados - Humor nacional - fluxo das soluções.
 
 
+```{r}
+
+banco_completo %>% 
+  filter(tarifa_zero == "sim") %>% 
+  group_by(ano_implementacao) %>% 
+  tally() %>% 
+  arrange(n) %>% 
+  mutate(ano_protestos = 2013) %>% 
+  ggplot() + 
+  geom_point(aes(x = ano_implementacao, y = n, size = n), color = "#c57d4b", alpha = 0.7) + 
+  geom_vline(xintercept = 2013) + 
+  geom_vline(xintercept = 2020) + 
+  scale_y_continuous(breaks = c(2, 4, 6, 8, 10, 12, 14)) +
+  geom_text_repel(aes(x = ano_implementacao, y = n, label = ano_implementacao), size = 3, hjust = 0.5, vjust = 1.5,point.padding = 0.5) + 
+   theme_light() +
+  ggtitle("Proximidade entre Jornadas de Junho de 2013, Pandemia de Covid-19 e Tarifa Zero") +
+  xlab("") +
+  ylab("") +
+  theme(plot.title = element_text(family = "serif", size = 12, face = "bold", hjust = 0.5, colour = "black"),
+  plot.caption = element_text(family = "serif", size = 10),
+  strip.text.x = element_text(colour = "White", hjust = 0.5, family = "serif", face = "bold"),
+    text = element_text(family = "serif", size = 14),
+    axis.text.x=element_blank(),
+    axis.text.y=element_text(size = 11, family = "serif"),
+    legend.position = "none") +
+     labs(caption = "Fonte: Levantamento Colabarativo, 2022 
+                     Elaboração Própria") +
+  annotate("label", x=2013, y=10, label="Jornadas de Junho de 2013",
+  color="black", size=3) + 
+  annotate(
+  "label", x=2020, y=9.5, label="Pandemia de Covid-19",
+  color="black", size=3)
+
+
+```
 
 
 
