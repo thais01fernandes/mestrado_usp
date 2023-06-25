@@ -1199,7 +1199,7 @@ regiao_sudeste
 
 
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 
 
 ggarrange(regiao_centro_oeste, regiao_nordeste, 
