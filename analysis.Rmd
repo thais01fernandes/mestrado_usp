@@ -1075,11 +1075,12 @@ regiao_nordeste <- banco_completo %>%
   geom_point(aes(x = ano_implementacao, y = populacao_estimada), color = "#579296", size = 4) + 
   geom_text_repel(aes(x = ano_implementacao, y = populacao_estimada, label = scales::dollar(prefix = " ", round(populacao_estimada, 1))), size = 3, hjust = 0.5, vjust = 1.5,point.padding = 0.5) +   
    theme_light() +
-  ggtitle("Região: Nordeste") +
+  ggtitle("Tamanho da população e ano de implementação de cada cidade 
+          Região: Nordeste") +
   xlab("") +
   ylab("") +
-  # labs(caption = "Fonte: IBGE, 2021 
-  #                 Elaboração Própria") +
+  labs(caption = "Fonte: IBGE, 2021 
+                 Elaboração Própria") +
   theme_light() + 
     theme(plot.title = element_text(family = "serif", size = 12, face = "bold", hjust = 0.5, colour = "black"),
           strip.background = element_rect(colour = "white", fill = "#579296"),
@@ -1114,8 +1115,8 @@ regiao_centro_oeste <- banco_completo %>%
   ggtitle("Região: Centro-Oeste") +
   xlab("") +
   ylab("") +
-  # labs(caption = "Fonte: IBGE, 2021 
-  #                 Elaboração Própria") +
+  ggtitle("Tamanho da população e ano de implementação de cada cidade 
+          Região: Centro-Oeste") +
   theme_light() + 
     theme(plot.title = element_text(family = "serif", size = 12, face = "bold", hjust = 0.5, colour = "black"),
           strip.background = element_rect(colour = "white", fill = "#579296"),
@@ -1145,11 +1146,12 @@ banco_completo %>%
   geom_point(aes(x = ano_implementacao, y = populacao_estimada), color = "#579296", size = 4) + 
   geom_text_repel(aes(x = ano_implementacao, y = populacao_estimada, label = scales::dollar(prefix = " ", round(populacao_estimada, 1))), size = 3, hjust = 0.5, vjust = 1.5,point.padding = 0.5) +
    theme_light() +
-  ggtitle("Região: Sul") +
+  ggtitle("Tamanho da população e ano de implementação de cada cidade 
+          Região: Sul") +
   xlab("") +
   ylab("") +
-  # labs(caption = "Fonte: IBGE, 2021 
-  #                 Elaboração Própria") +
+   labs(caption = "Fonte: IBGE, 2021 
+                   Elaboração Própria") +
   theme_light() + 
     theme(plot.title = element_text(family = "serif", size = 12, face = "bold", hjust = 0.5, colour = "black"),
           strip.background = element_rect(colour = "white", fill = "#579296"),
@@ -1174,25 +1176,25 @@ regiao_sudeste <- banco_completo %>%
   mutate(ano_implementacao = as.character(ano_implementacao)) %>% 
   ungroup() %>% 
   filter(regiao == " Sudeste") %>% 
-#  filter(ano_implementacao != 2021 & ano_implementacao != 2022) %>% 
   ggplot() + 
-  geom_point(aes(x = ano_implementacao, y = populacao_estimada), color = "#579296", size = 4) + 
-  geom_text_repel(aes(x = ano_implementacao, y = populacao_estimada, label = scales::dollar(prefix = " ", round(populacao_estimada, 1))), size = 3, hjust = 0.5, vjust = 1.5,point.padding = 0.5) + 
+  geom_point(aes(x = ano_implementacao, y = populacao_estimada, size = populacao_estimada), color = "#579296", alpha = 0.7) + 
+  # geom_text_repel(aes(x = ano_implementacao, y = populacao_estimada, label = scales::dollar(prefix = " ", round(populacao_estimada, 1))), size = 3, hjust = 0.5, vjust = 1.5,point.padding = 0.5) + 
    theme_light() +
-  ggtitle("Região: Sudeste") +
+  ggtitle("Tamanho da população e ano de implementação de cada cidade 
+          Região: Sudeste") + 
   xlab("") +
   ylab("") +
-  # labs(caption = "Fonte: IBGE, 2021 
-  #                 Elaboração Própria") +
+  labs(caption = "Fonte: IBGE, 2021 
+                  Elaboração Própria") +
   theme_light() + 
     theme(plot.title = element_text(family = "serif", size = 12, face = "bold", hjust = 0.5, colour = "black"),
           strip.background = element_rect(colour = "white", fill = "#579296"),
           plot.caption = element_text(family = "serif", size = 10),
   strip.text.x = element_text(colour = "White", hjust = 0.5, family = "serif", face = "bold"),
     text = element_text(family = "serif", size = 14),
-    axis.text.y=element_blank(),
-    axis.text.x=element_text(size = 11, family = "serif"),
-    legend.position = "bottom")
+    axis.text.x=element_text(size = 10, family = "serif"),
+    legend.position = "botton") +
+   scale_y_continuous(labels = function(x) format(x, big.mark = "."))
 regiao_sudeste
 
 ```
@@ -1202,20 +1204,64 @@ regiao_sudeste
 ```{r eval=FALSE, include=FALSE}
 
 
-ggarrange(regiao_centro_oeste, regiao_nordeste, 
+oeste_nordeste <- ggarrange(regiao_centro_oeste, regiao_nordeste, 
                                  ncol = 1, nrow = 2)
+
+oeste_nordeste
+
+```
+
+
+Todas as cidades brasileiras: 
+
+```{r }
+
+
+options(scipen = 999)
+
+  banco_completo %>% 
+  filter(tarifa_zero == "sim") %>% 
+  select(regiao, ano_implementacao, populacao_estimada) %>% 
+  group_by(ano_implementacao, regiao, populacao_estimada) %>% 
+  arrange(regiao) %>% 
+  mutate(ano_implementacao = as.character(ano_implementacao)) %>% 
+  ungroup() %>% 
+  rename(`Região:` = regiao) %>% 
+  ggplot() + 
+  geom_point(aes(x = ano_implementacao, y = populacao_estimada, color = `Região:`), alpha = 0.5, size = 5) + 
+ theme_light() +
+  ggtitle("Tamanho da população e ano de implementação de cada cidade 
+          Todas as Regiões") +
+  xlab("") +
+  ylab("") +
+  labs(caption = "Fonte: IBGE, 2021 
+                 Elaboração Própria") +
+  theme_light() + 
+    theme(plot.title = element_text(family = "serif", size = 12, face = "bold", hjust = 0.5, colour = "black"),
+          strip.background = element_rect(colour = "white", fill = "#579296"),
+          plot.caption = element_text(family = "serif", size = 10),
+  strip.text.x = element_text(colour = "White", hjust = 0.5, family = "serif", face = "bold"),
+    text = element_text(family = "serif", size = 12),
+    axis.text.x=element_text(size = 9, family = "serif"),
+    legend.position = "top") + 
+    scale_y_continuous(labels = function(x) format(x, big.mark = "."))
+
 
 ```
 
 
 ## 2. Teoria dos Multilplos Fluxos 
 
-**1° premissa:**Verificar a proximidade temporal entre debate nacional (2013) e adoção da tarifa zero pelos municípios e se nas entrevistas esses eventos são citados - Humor nacional - fluxo das soluções.
+**1° premissa:**Verificar a proximidade temporal entre debate nacional (Jornadas de Junho de 2013 e Pandemia de Covid-19) e adoção da tarifa zero pelos municípios e se nas entrevistas esses eventos são citados - Humor nacional - fluxo das soluções.
 
 
 ```{r}
 
-banco_completo %>% 
+file1 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/banco_completo"
+banco_completo_1 <- read_delim(file1, delim = ",", 
+                        locale = locale(encoding='UTF-8')) %>% select(-1)
+
+banco_completo_1 %>% 
   filter(tarifa_zero == "sim") %>% 
   group_by(ano_implementacao) %>% 
   tally() %>% 
@@ -1228,7 +1274,7 @@ banco_completo %>%
   scale_y_continuous(breaks = c(2, 4, 6, 8, 10, 12, 14)) +
   geom_text_repel(aes(x = ano_implementacao, y = n, label = ano_implementacao), size = 3, hjust = 0.5, vjust = 1.5,point.padding = 0.5) + 
    theme_light() +
-  ggtitle("Proximidade entre Jornadas de Junho de 2013, Pandemia de Covid-19 e Tarifa Zero") +
+  ggtitle("Proximidade entre Jornadas de Junho de 2013, Pandemia de Covid-19 e adoção da Tarifa Zero") +
   xlab("") +
   ylab("") +
   theme(plot.title = element_text(family = "serif", size = 12, face = "bold", hjust = 0.5, colour = "black"),
@@ -1238,18 +1284,25 @@ banco_completo %>%
     axis.text.x=element_blank(),
     axis.text.y=element_text(size = 11, family = "serif"),
     legend.position = "none") +
-     labs(caption = "Fonte: Levantamento Colabarativo, 2022 
+    labs(caption = "Fonte: Levantamento Colabarativo, 2022 
                      Elaboração Própria") +
   annotate("label", x=2013, y=10, label="Jornadas de Junho de 2013",
   color="black", size=3) + 
   annotate(
-  "label", x=2020, y=9.5, label="Pandemia de Covid-19",
+  "label", x=2020, y=10, label="Pandemia de Covid-19",
   color="black", size=3)
 
 
 ```
 
 
+```{r eval=FALSE, include=FALSE}
+
+
+eleicoes %>% distinct(ANO_ELEICAO)
+
+
+```
 
 
 
