@@ -8,6 +8,9 @@ library('googlesheets4')
 library("janitor")
 library ("abjData")
 library("geobr")
+library("dplyr")
+library("tidyr")
+library("purrr")
 
 ## Baixando os dados
 
@@ -19,17 +22,18 @@ munic_pib <- read_delim(file1, delim = ",",
                         locale = locale(encoding='latin1'))
 
 
-# Informações básicas municipais - População Municipal, estimativa de 2021 pelo IBGE 
-# endereço: https://www.ibge.gov.br/estatisticas/sociais/populacao/9103-estimativas-de-populacao.html?=&t=downloads
+# Resultados do Censo 2022, População coletada e população imputada, por município
+# endereço: https://www.ibge.gov.br/estatisticas/sociais/populacao/22827-censo-demografico-2022.html?edicao=37225&t=resultados
 
 
-file2 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/pop_munic"
-munic_pop <- read_delim(file2, delim = ",", 
-                        locale = locale(encoding='latin1'))
+file2 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/pop_munic.csv"
+munic_pop <- read_delim(file2, delim = ";", 
+                        locale = locale(encoding='UTF-8')) %>% filter(!is.na(uf))
+
 
 # Cidades com tarifa zero - levantamento produzido por pesquisadores do tema
 
-ffpt_cities <- read_sheet(ss = "https://docs.google.com/spreadsheets/d/1UnKXflAf5RVRMhCL-FuroTsPZBy7am3qAmD5j_hXc3g/edit#gid=0", sheet = 1) 
+ffpt_cities <- read_sheet(ss = "https://docs.google.com/spreadsheets/d/1UnKXflAf5RVRMhCL-FuroTsPZBy7am3qAmD5j_hXc3g/edit#gid=0", sheet = "Codigo IBGE") 
 
 
 # Base de dados sobre transporte público - IBGE, 2020
@@ -61,58 +65,57 @@ file6 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/d
   indice_ipea <- read_delim(file6, delim = ",",
                           locale = locale(encoding='latin1'))
   
+# Base de Recursos Humanos da Base de Informações Municipais de 2021
+# Endereço: https://www.ibge.gov.br/estatisticas/sociais/saude/10586-pesquisa-de-informacoes-basicas-municipais.html?=&t=downloads
+  
+  
+file7 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/recursos_humanos"
+  recursos_humanos <- read_delim(file7, delim = ",",
+                                 locale = locale(encoding='latin1'))
+  
 ## Base de dados de estatísticas eleitorais do TSE - Eleições Anteriores
 # Endereço: https://www.tse.jus.br/eleicoes/eleicoes-anteriores 
   
   
-  file7 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/votacao_2000"
-  votacao_2000 <- read_delim(file7, delim = ",", 
-                                locale = locale(encoding='latin1'))
-  
-  file8 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/votacao_2004"
-  votacao_2004 <- read_delim(file8, delim = ",", 
-                                locale = locale(encoding='latin1'))
-  
-  file9 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/votacao_2008"
-  votacao_2008 <- read_delim(file9, delim = ",", 
-                                locale = locale(encoding='latin1'))
-  
-  file10 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/votacao_2012"
-  votacao_2012 <- read_delim(file10, delim = ",", 
-                                locale = locale(encoding='latin1'))
-  
-  file11 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/votacao_2016"
-  votacao_2016 <- read_delim(file11, delim = ",", 
-                                locale = locale(encoding='latin1'))
-  
-  file12 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/votacao_2020"
-  votacao_2020 <- read_delim(file12, delim = ",", 
-                                locale = locale(encoding='latin1'))
-  
-  file13 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/tarifa_zero_codigos_tse"
-  tarifa_zero_tse <- read_delim(file13, delim = ",", 
-                             locale = locale(encoding='latin1')) ## cidades com tarifa zero com o código TSE
-  
+  file8 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/votacao_1996"
+  votacao_1996 <- read_delim(file8, delim = ",", 
+                             locale = locale(encoding='latin1')) %>% select(-1)
 
+  
+  file9 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/votacao_2000"
+  votacao_2000 <- read_delim(file9, delim = ",", 
+                                locale = locale(encoding='latin1')) %>% select(-1) 
+  
+  file10 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/votacao_2004"
+  votacao_2004 <- read_delim(file10, delim = ",", 
+                                locale = locale(encoding='latin1')) %>% select(-1)
+  
+  file11 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/votacao_2008"
+  votacao_2008 <- read_delim(file11, delim = ",", 
+                                locale = locale(encoding='latin1')) %>% select(-1)
+  
+  file12 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/eleicoes_2012"
+  votacao_2012 <- read_delim(file12, delim = ";", 
+                                locale = locale(encoding='latin1')) %>% select(-1)  %>% mutate(SG_UE = as.character(SG_UE), 
+                                                                                               CD_MUNICIPIO = as.character(CD_MUNICIPIO)) 
+  
+  file13 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/votacao_2016"
+  votacao_2016 <- read_delim(file13, delim = ",", 
+                                locale = locale(encoding='latin1')) %>% select(-1) 
+  
+  file14 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/votacao_2020"
+  votacao_2020 <- read_delim(file14, delim = ",", 
+                                locale = locale(encoding='latin1')) %>% select(-1)
+
+  tarifa_zero_tse <- read_sheet(ss = "https://docs.google.com/spreadsheets/d/1UnKXflAf5RVRMhCL-FuroTsPZBy7am3qAmD5j_hXc3g/edit#gid=0", sheet = 2)   ## cidades com tarifa zero com o código TSE
+  
 
 # Todos os seguintes dados foram baixados do pacote R "abjData": Índice de Desenvolvimento Humano Municipal (IDHM), índice de Gini e índice de Theil, IVS municipal, Índice de prosperidade social, População Urbana e Rural, Renda per Capta, % de pobres
 # Os dados do índice de vulnerabilidade econômica foram retirados do site do ipea: http://ivs.ipea.gov.br/index.php/pt/planilha 
 # Todos esses dados são referentes ao censo IBGE 2010
 # Endereço: https://abjur.github.io/abjData/
 
-# Tratamento na base de população que tem o código do município sem iniciar com o código da UF
 
-munic_pop_2 <-
-area_territorial %>% 
-  select(CD_UF, NM_UF_SIGLA) %>% 
-  rename(uf = NM_UF_SIGLA) %>% 
-  left_join(munic_pop, by = "uf") %>% 
-  select(CD_UF, cod_munic, nome_do_municipio, uf, populacao_estimada) %>% 
-  unite("cod_munic", c(CD_UF,cod_munic), sep="") %>% 
-  distinct(cod_munic, .keep_all = TRUE)  %>% 
-  mutate(cod_munic = as.double(cod_munic))
-  
-  
 # Juntando as bases, criando algumas variáveis novas e tratando a base final
   
 banco_completo <- 
@@ -150,15 +153,15 @@ banco_completo <-
            `Maiores de 60/65 anos`, `Estudantes da rede pública`, `Estudantes da rede privada`, Carteiros, `Pessoas com deficiência`, Policiais, Professores, 
            `Crianças menores de 5 anos`, `Toda a população`, `Nenhum passageiro`, `Ciclovia no município`,  rdpc, pesourb, pesorur, pesotot, theil, gini, idhm_r, idhm_l, idhm_e, idhm,	
            pmpob) %>% 
-    left_join(munic_pop_2, by = "cod_munic") %>% 
-    mutate(populacao_estimada = as.double(populacao_estimada)) %>% 
-    mutate(classe_pop = case_when(populacao_estimada <= 5000 ~ "Up to 5.000", 
-                                  populacao_estimada >= 5001 & populacao_estimada <= 10000 ~ "5.000 up to 10.000",
-                                  populacao_estimada >= 10001 & populacao_estimada <= 20000 ~ "10.000 up to 20.000", 
-                                  populacao_estimada >= 20001 & populacao_estimada <= 50000 ~ "20.000 up to 50.000", 
-                                  populacao_estimada >= 50001 & populacao_estimada <= 100000 ~ "50.000 up to 100.000", 
-                                  populacao_estimada >= 100001 & populacao_estimada <= 500000 ~ "100.000 up to 500.000",
-                                  populacao_estimada >= 500001 ~ "Greater than 500.000", TRUE ~ "NA")) %>% 
+    left_join(munic_pop, by = "cod_munic") %>% 
+    mutate(populacao = as.double(populacao)) %>% 
+    mutate(classe_pop = case_when(populacao <= 5000 ~ "Up to 5.000", 
+                                  populacao >= 5001 & populacao <= 10000 ~ "5.000 up to 10.000",
+                                  populacao >= 10001 & populacao <= 20000 ~ "10.000 up to 20.000", 
+                                  populacao >= 20001 & populacao <= 50000 ~ "20.000 up to 50.000", 
+                                  populacao >= 50001 & populacao <= 100000 ~ "50.000 up to 100.000", 
+                                  populacao >= 100001 & populacao <= 500000 ~ "100.000 up to 500.000",
+                                  populacao >= 500001 ~ "Greater than 500.000", TRUE ~ "NA")) %>% 
     left_join(indice_ipea, by = c("cod_munic" = "Município")) %>% 
     left_join(area_territorial, by = c("cod_munic" = "CD_MUN")) %>% 
     left_join(munic_pib, by = c("cod_munic" = "codigo_do_municipio")) %>% 
@@ -202,14 +205,32 @@ banco_completo <-
                                      ivs_capital_humano  >= 0.301 & ivs_capital_humano <= 0.400 ~ "Medium", 
                                      ivs_capital_humano  >= 0.401 ~"High", TRUE ~ "indice_ivs")) %>% 
   mutate(taxa_urbanizacao = pesourb/pesotot) %>% 
-  mutate(densidade_demografica = populacao_estimada/ar_mun_2022)
+  mutate(densidade_demografica = populacao/ar_mun_2022) %>% 
+  left_join(recursos_humanos, by = c("cod_munic" = "CodMun")) %>% 
+  select(-75:-81, -88:-94) %>% 
+  rename(Estatutarios = Mreh0111, 
+         Celetistas = Mreh0112, 
+         Comissionados = Mreh0113, 
+         Estagiarios = Mreh0114, 
+         sem_vinculo_permanente = Mreh0115) %>% 
+  mutate(ano_implementacao_classe = case_when(ano_implementacao <= 1998 ~ "Anos 90", 
+                                              ano_implementacao >= 2001 & ano_implementacao  <= 2009 ~ "Entre 2001 e 2009",
+                                              ano_implementacao >= 2010 & ano_implementacao <= 2015 ~  "Entre 2010 e 2015", 
+                                              ano_implementacao >= 2016 & ano_implementacao <= 2020 ~  "Entre 2016 e 2020", 
+                                              ano_implementacao >= 2021  ~ "Entre 2021 e 2022", 
+                                              TRUE ~ "NA"))
+
   
 
 # Salvando o banco completo no Github pra ser usado no arquivo Rmarckdown que será usado para o relatório:
 
-# write.csv(banco_completo, "banco_completo")
+write.csv(banco_completo, "banco_completo")
 
-## Tratamento dos dados Eleitorais: 
+
+# ----------------------------------------------------------------------------
+
+## Tratamento dos dados Eleitorais para a análise "Teoria do Eleitor Mediano":
+
 
 dados_Votacao <- bind_rows(votacao_2000, votacao_2004, votacao_2008, votacao_2012, votacao_2016, votacao_2020) %>% 
   select(3,6, 11, 14, 15, 21, 30, 38) %>% 
@@ -218,7 +239,7 @@ dados_Votacao <- bind_rows(votacao_2000, votacao_2004, votacao_2008, votacao_201
   ungroup()
 
 
-munic_segundo_turno_usar <- dados_Votação %>%  filter(NR_TURNO == 2) %>% 
+munic_segundo_turno_usar <- dados_Votacao %>%  filter(NR_TURNO == 2) %>% 
   group_by(ANO_ELEICAO, CD_MUNICIPIO) %>% 
   mutate(pct = votos_nominais/sum(votos_nominais)*100) %>% 
   mutate(pct = round(pct, digits = 1)) %>% 
@@ -245,7 +266,7 @@ dados_votacao_completo <- dados_Votacao %>%
 
 candidatos_eleitos <- dados_votacao_completo %>%  
   group_by(ANO_ELEICAO, CD_MUNICIPIO) %>% 
-  slice_max(pct) %>% 
+  slice_max(votos_nominais) %>% 
   mutate(Situacao= "Eleito") %>% 
   ungroup()
 
@@ -254,7 +275,7 @@ candidatos_eleitos <- dados_votacao_completo %>%
 candidatos_segundo_lugar <- dados_votacao_completo %>% 
   anti_join(candidatos_eleitos, by = c("ANO_ELEICAO", "CD_MUNICIPIO", "pct")) %>% 
   group_by(ANO_ELEICAO, CD_MUNICIPIO) %>% 
-  slice_max(pct) %>% 
+  slice_max(votos_nominais) %>% 
   mutate(Situacao = "Segundo lugar") %>% 
   ungroup()
 
@@ -279,9 +300,9 @@ eleicoes <- candidatos_eleitos_1 %>%
 
 cidades_tarifa_zero <- tarifa_zero_tse %>% 
   select(CD_MUNICIPIO, tarifa_zero) %>% 
-  mutate(CD_MUNICIPIO = as.character(CD_MUNICIPIO)) 
+  mutate(CD_MUNICIPIO = as.character(CD_MUNICIPIO))  
 
-eleicoes %>% 
+eleicoes_quase <- eleicoes %>% 
   left_join(cidades_tarifa_zero, by = "CD_MUNICIPIO") %>% 
   filter(CD_MUNICIPIO !=  "79430" | 
            partido_candidato_eleito != "PMDB" |
@@ -289,8 +310,195 @@ eleicoes %>%
            partido_segundo_lugar != "PSDC") %>% 
   rename(nome_munic = NM_MUNICIPIO.x, turno_eleicao = NR_TURNO.x) %>% 
   select(CD_MUNICIPIO, nome_munic, ANO_ELEICAO, turno_eleicao, tarifa_zero, 
-         partido_candidato_eleito, partido_segundo_lugar, Eleito, `Segundo lugar`, diferenca_votos)
+         partido_candidato_eleito, partido_segundo_lugar, Eleito, `Segundo lugar`, diferenca_votos) %>% 
+  distinct(CD_MUNICIPIO, nome_munic, ANO_ELEICAO, turno_eleicao, partido_candidato_eleito, partido_segundo_lugar, .keep_all = TRUE)
+
+# Tiramos  os municípios em que a votaçao deu empate no 1° turno e não há informação do 2° turno dessas cidades no banco de dados do TSE
+# São 57 cidades: 3 das eleicoes de 2000, 39 de 2004, 2 de 2008, 8 de 2012, 2 de 2016 e 3 de 2020. 
+
+cidades_empate <- eleicoes_quase %>% 
+  group_by(CD_MUNICIPIO, ANO_ELEICAO) %>% 
+  tally() %>% 
+  filter(n == 2) %>% 
+  select(-n)
+
+eleicoes_1 <- eleicoes_quase %>% 
+  anti_join(cidades_empate) 
+
 
 # Salvando o banco de dados no Git hub: 
 
-# write.csv(eleicoes, "eleicoes")
+# write.csv(eleicoes_1, "eleicoes_1")
+
+
+# ----------------------------------------------------------------------------------------
+
+## Tratamento dos dados Eleitorais para a análise "Teoria dos Multiplos Fluxos": 
+
+dados_votacao_completo_2 <- eleicoes_1 %>% 
+  filter(tarifa_zero == "sim") %>% 
+  select(CD_MUNICIPIO,ANO_ELEICAO, partido_candidato_eleito) %>% 
+  rename(SG_PARTIDO = partido_candidato_eleito)
+
+nome_cidades <- eleicoes_1 %>% 
+  filter(tarifa_zero == "sim") %>% 
+  distinct(CD_MUNICIPIO, .keep_all = TRUE) %>% 
+  select(CD_MUNICIPIO, nome_munic)
+
+filtrar_pivotar_anos <- function(ano) {
+  dados_votacao_completo_2 %>%
+    filter(ANO_ELEICAO == ano) %>%
+    pivot_wider(names_from = ANO_ELEICAO, values_from = SG_PARTIDO)
+}
+
+
+anos_eleicao <- c(2000, 2004, 2008, 2012, 2016, 2020)
+
+resultados <- map(anos_eleicao, filtrar_pivotar_anos)
+
+
+eleicao_2000 <- resultados[[1]] 
+eleicao_2004 <- resultados[[2]] 
+eleicao_2008 <- resultados[[3]] 
+eleicao_2012 <- resultados[[4]] 
+eleicao_2016 <- resultados[[5]]
+eleicao_2020 <- resultados[[6]]
+
+# Juntando as bases 
+
+eleicoes_quase_pronto <- eleicao_2000 %>% 
+  left_join(eleicao_2004, by = c("CD_MUNICIPIO")) %>% 
+  left_join(eleicao_2008, by = c("CD_MUNICIPIO")) %>% 
+  left_join(eleicao_2012, by = c("CD_MUNICIPIO")) %>% 
+  left_join(eleicao_2016, by = c("CD_MUNICIPIO")) %>% 
+  left_join(eleicao_2020, by = c("CD_MUNICIPIO")) %>% 
+  left_join(nome_cidades, by = c("CD_MUNICIPIO")) %>% 
+  clean_names() %>% 
+  mutate(nome_munic = str_to_title(nome_munic)) %>% 
+  select(nome_munic, cd_municipio, x2000, x2004, x2008, x2012, x2016, x2020)
+
+colunas <- c("x2000", "x2004", "x2008", "x2012", "x2016", "x2020")
+
+eleicoes_quase_pronto_2 <- eleicoes_quase_pronto %>%
+  mutate(across(all_of(colunas), ~case_when(
+    . == "PMDB" ~ "Centro",
+    . == "PDT" ~ "Centro Esquerda",
+    . == "PPB" ~ "Direita",
+    . == "PSB" ~ "Esquerda",
+    . == "PTB" ~ "Centro Direita",
+    . == "PFL" ~ "Direita",
+    . == "PSDB" ~ "Centro",
+    . == "PT" ~ "Esquerda",
+    . == "PMN" ~ "Direita",
+    . == "PV" ~ "Esquerda",
+    . == "PL" ~ "Direita",
+    . == "PPS" ~ "Centro Esquerda",
+    . == "PST" ~ "Direita",
+    . == "PSD" ~ "Centro Direita",
+    . == "PSC" ~ "Extrema Direita",
+    . == "PRP" ~ "Direita",
+    . == "PRTB" ~ "Direita",
+    . == "PSL" ~ "Extrema Direita",
+    . == "PSDC" ~ "Extrema Direita",
+    . == "PHS" ~ "Esquerda",
+    . == "PC do B" ~ "Esquerda",
+    . == "PT do B" ~ "Direita",
+    . == "PAN" ~ "Centro",
+    . == "PRN" ~ "Direita",
+    . == "PTN" ~ "Direita",
+    . == "PP" ~ "Centro",
+    . == "PRONA" ~ "Direita",
+    . == "PTC" ~ "Centro",
+    . == "PR" ~ "Direita",
+    . == "DEM" ~ "Extrema Direita",
+    . == "PRB" ~ "Direita",
+    . == "PPL" ~ "Centro",
+    . == "PSOL" ~ "Extrema Esquerda",
+    . == "SD" ~ "Centro Direita",
+    . == "PROS" ~ "Centro",
+    . == "MDB" ~ "Centro",
+    . == "PMB" ~ "Centro Direita",
+    . == "REDE" ~ "Centro Esquerda",
+    . == "PEN" ~ "Centro",
+    . == "PATRI" ~ "Centro",
+    . == "PCB" ~ "Esquerda",
+    . == "PATRIOTA" ~ "Centro",
+    . == "PODE" ~ "Centro Direita",
+    . == "AVANTE" ~ "Centro",
+    . == "REPUBLICANOS" ~ "Centro Direita",
+    . == "SOLIDARIEDADE" ~ "Centro",
+    . == "CIDADANIA" ~ "Centro",
+    . == "DC" ~ "Centro Direita",
+    . == "NOVO" ~ "Direita"
+  )))
+
+eleicoes_2 <- eleicoes_quase_pronto_2 %>% left_join(eleicoes_quase_pronto, by = c("nome_munic", "cd_municipio"))
+  
+
+# Salvando o banco de dados no Git hub: 
+
+# write.csv(eleicoes_2, "eleicoes_2")
+
+# ---------------------------------------------------------------------------------------------------
+
+# banco para a análise da teoria do sistema partidário 
+
+eleicoes_3 <- eleicoes_1 %>% 
+  select(CD_MUNICIPIO, nome_munic, tarifa_zero, ANO_ELEICAO, partido_candidato_eleito) %>% 
+  mutate(tarifa_zero = case_when(tarifa_zero == "sim" ~ "sim", 
+                                 TRUE ~ "não")) %>% 
+  mutate(nome_munic = str_to_title(nome_munic)) %>% 
+  mutate(ideologia_dos_partidos = case_when(partido_candidato_eleito == "PMDB" ~ "Centro",
+                                            partido_candidato_eleito == "PDT" ~ "Centro Esquerda",
+                                            partido_candidato_eleito == "PPB" ~ "Direita",
+                                            partido_candidato_eleito == "PSB" ~ "Esquerda",
+                                            partido_candidato_eleito == "PTB" ~ "Centro Direita",
+                                            partido_candidato_eleito == "PFL" ~ "Direita",
+                                            partido_candidato_eleito == "PSDB" ~ "Centro",
+                                            partido_candidato_eleito == "PT" ~ "Esquerda",
+                                            partido_candidato_eleito == "PMN" ~ "Direita",
+                                            partido_candidato_eleito == "PV" ~ "Esquerda",
+                                            partido_candidato_eleito == "PL" ~ "Direita",
+                                            partido_candidato_eleito == "PPS" ~ "Centro Esquerda",
+                                            partido_candidato_eleito == "PST" ~ "Direita",
+                                            partido_candidato_eleito == "PSD" ~ "Centro Direita",
+                                            partido_candidato_eleito == "PSC" ~ "Extrema Direita",
+                                            partido_candidato_eleito == "PRP" ~ "Direita",
+                                            partido_candidato_eleito == "PRTB" ~ "Direita",
+                                            partido_candidato_eleito == "PSL" ~ "Extrema Direita",
+                                            partido_candidato_eleito == "PSDC" ~ "Extrema Direita",
+                                            partido_candidato_eleito == "PHS" ~ "Esquerda",
+                                            partido_candidato_eleito == "PC do B" ~ "Esquerda",
+                                            partido_candidato_eleito == "PT do B" ~ "Direita",
+                                            partido_candidato_eleito == "PAN" ~ "Centro",
+                                            partido_candidato_eleito == "PRN" ~ "Direita",
+                                            partido_candidato_eleito == "PTN" ~ "Direita",
+                                            partido_candidato_eleito == "PP" ~ "Centro",
+                                            partido_candidato_eleito == "PRONA" ~ "Direita",
+                                            partido_candidato_eleito == "PTC" ~ "Centro",
+                                            partido_candidato_eleito == "PR" ~ "Direita",
+                                            partido_candidato_eleito == "DEM" ~ "Extrema Direita",
+                                            partido_candidato_eleito == "PRB" ~ "Direita",
+                                            partido_candidato_eleito == "PPL" ~ "Centro",
+                                            partido_candidato_eleito == "PSOL" ~ "Extrema Esquerda",
+                                            partido_candidato_eleito == "SD" ~ "Centro Direita",
+                                            partido_candidato_eleito == "PROS" ~ "Centro",
+                                            partido_candidato_eleito == "MDB" ~ "Centro",
+                                            partido_candidato_eleito == "PMB" ~ "Centro Direita",
+                                            partido_candidato_eleito == "REDE" ~ "Centro Esquerda",
+                                            partido_candidato_eleito == "PEN" ~ "Centro",
+                                            partido_candidato_eleito == "PATRI" ~ "Centro",
+                                            partido_candidato_eleito == "PCB" ~ "Esquerda",
+                                            partido_candidato_eleito == "PATRIOTA" ~ "Centro",
+                                            partido_candidato_eleito == "PODE" ~ "Centro Direita",
+                                            partido_candidato_eleito == "AVANTE" ~ "Centro", 
+                                            partido_candidato_eleito == "REPUBLICANOS" ~ "Centro Direita",
+                                            partido_candidato_eleito == "SOLIDARIEDADE" ~ "Centro",
+                                            partido_candidato_eleito == "CIDADANIA" ~ "Centro",
+                                            partido_candidato_eleito == "DC" ~ "Centro Direita",
+                                            partido_candidato_eleito == "NOVO" ~ "Direita")) 
+
+# Salvando o banco de dados no Git hub: 
+
+# write.csv(eleicoes_3, "eleicoes_3")
+

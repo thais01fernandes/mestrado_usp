@@ -1,7 +1,7 @@
 
 .title {
   margin-top: 1.50em !important;
-  margin-bottom: 0.75em;
+  margin-bottom: 0.55em;
 }
 
 @import url('https://fonts.googleapis.com/css2?family=Lora:wght@500&display=swap');
@@ -43,7 +43,7 @@ p{
 }
 
 h1, .h1, h2, .h2, h3, .h3 , h4, .h4, h5, .h5, h6, .h6, h7, .h7, h8, .h8 {
-  margin-top: 70px;
+  margin-top: 50px;
 }
 
 

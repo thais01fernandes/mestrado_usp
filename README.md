@@ -18,7 +18,7 @@ Este trabalho de mestrado é uma análise exploratória a respeito da adoção d
 
 1. [PIB Municipal - IBGE, 2020](https://www.ibge.gov.br/estatisticas/economicas/contas-nacionais/9088-produto-interno-bruto-dos-municipios.html?=&t=resultados)
 
-2. [População Municipal estimativa - IBGE, 2021](https://www.ibge.gov.br/estatisticas/sociais/populacao/9103-estimativas-de-populacao.html?=&t=downloads)
+2. [População Municipal, Censo IBGE 2022](https://www.ibge.gov.br/estatisticas/sociais/populacao/22827-censo-demografico-2022.html?edicao=37225&t=resultados)
 
 3. [Cidades com tarifa zero - levantamento produzido por pesquisadores do tema](https://docs.google.com/spreadsheets/d/1UnKXflAf5RVRMhCL-FuroTsPZBy7am3qAmD5j_hXc3g/edit#gid=0)
 

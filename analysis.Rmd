@@ -63,6 +63,7 @@ library(PNADcIBGE)
 
 ```
 
+
 ```{r Baixando os dados}
 
 file1 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/banco_completo"
@@ -72,6 +73,16 @@ banco_completo <- read_delim(file1, delim = ",",
 
 file2 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/eleicoes_1"
   eleicoes <- read_delim(file2, delim = ",", 
+                             locale = locale(encoding='UTF-8')) %>% select(-1) 
+  
+
+file3 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/eleicoes_2"
+  eleicoes_1 <- read_delim(file3, delim = ",", 
+                             locale = locale(encoding='UTF-8')) %>% select(-1) 
+  
+
+file4 <- "https://raw.githubusercontent.com/thais01fernandes/mestrado_usp/main/dados/eleicoes_3"
+  eleicoes_2 <- read_delim(file4, delim = ",", 
                              locale = locale(encoding='UTF-8')) %>% select(-1) 
 
 
@@ -460,7 +471,7 @@ two indexes for all the municipalities with a Tarifa Zero:
 # Labels: 
 
 label_gini_theil <- banco_completo %>% 
-    pivot_longer(cols = c("gini", "theil")) %>%
+   pivot_longer(cols = c("gini", "theil")) %>%
     mutate(name = case_when(
     name == "gini" ~ "Gini",
     name == "theil" ~ "Theil-L")) %>% 
@@ -658,15 +669,128 @@ ffpt <- banco_completo %>%
 
 ```
 
-**3° premissa** Trabalhadores informais são mais favoráveis à política pois não usufruem da política de vale transporte limitada à trabalhadores formais, por isso nas cidades com tarifa zero há mais trabalhadores informais do que formais. 
+**3° premissa** Quanto maior a variedade de espectros políticos de partidos que adotam a política, mais provável ela não ter uma lógica partidária e sim eleitoral. Se essa premissa for verdadeira esperamos ter uma distribuição variada de espectros políticos que adotaram a tarifa zero.  
 
 
-```{r eval=FALSE, include=FALSE}
+```{r}
 
-dadosPNADc_brutos <- get_pnadc(year=2017, quarter=4, vars=c("V2009","V4009","V4012", "V4029"), design=FALSE)
+# cidade que a eleição do prefeito que implantou foi em 2008
+
+eleicao_2000 <- eleicoes_1 %>% filter(nome_munic == "Ivaipora" | 
+                                      nome_munic == "Faxinal" |
+                                      nome_munic == "Agudos" |
+                                      nome_munic == "Macatuba") %>% 
+  select(nome_munic, x2000.y,  x2000.x) %>% 
+  rename(`Partido do Prefeito que Implementou a Política` = x2000.y,
+         `Ideologia do Partido do Prefeito que Implementou a Política` = x2000.x)
+
+
+eleicao_2004 <- eleicoes_1 %>% filter(nome_munic == "Aruana"|
+                                      nome_munic == "Holambra") %>% 
+  select(nome_munic, x2004.y,  x2004.x) %>% 
+  rename(`Partido do Prefeito que Implementou a Política` = x2004.y,
+         `Ideologia do Partido do Prefeito que Implementou a Política` = x2004.x)
+
+# cidade que a eleição do prefeito que implantou foi em 2008
+
+eleicao_2008 <- eleicoes_1 %>% filter(nome_munic == "Wenceslau Braz" |
+                      nome_munic == "Holambra" |
+                      nome_munic == "Euzebio" | 
+                      nome_munic == "Muzambinho" | 
+                      nome_munic == "Pitanga" |
+                      nome_munic == "Ilha Solteira" |
+                      nome_munic == "Presidente Kennedy") %>% 
+  select(nome_munic, x2008.y, x2008.x) %>% 
+  rename(`Partido do Prefeito que Implementou a Política` = x2008.y, 
+         `Ideologia do Partido do Prefeito que Implementou a Política` = x2008.x)
+
+# cidade que a eleição do prefeito que implantou foi em 2012
+
+eleicao_2012 <- eleicoes_1 %>% filter(nome_munic == "Silva Jardim" |
+                      nome_munic == "Dourado" | 
+                      nome_munic == "Marica" | 
+                      nome_munic == "Anicuns" |
+                      nome_munic == "Itatiaiucu") %>% 
+  select(nome_munic, x2012.y,  x2012.x) %>% 
+  rename(`Partido do Prefeito que Implementou a Política` = x2012.y, 
+         `Ideologia do Partido do Prefeito que Implementou a Política` = x2012.x)
+
+# cidade que a eleição do prefeito que implantou foi em 2016
+
+eleicao_2016 <- eleicoes_1 %>% filter(nome_munic == "Ibaiti" |
+                      nome_munic == "Santa Rita Do Passa Quatro" |
+                      nome_munic == "Aquiraz" | 
+                      nome_munic == "Pedro Osorio" | 
+                      nome_munic == "Sao Joao Da Barra" |
+                      nome_munic == "Sao Jose Da Barra" |
+                      nome_munic == "Morungaba" |
+                      nome_munic == "Arceburgo" | 
+                      nome_munic == "Vargem Grande Paulista" | 
+                      nome_munic == "Campo Belo" |
+                      nome_munic == "Cerquilho" |
+                      nome_munic == "Pirapora Do Bom Jesus" |
+                      nome_munic == "Volta Redonda") %>% 
+  select(nome_munic, x2016.y, x2016.x) %>% 
+  rename(`Partido do Prefeito que Implementou a Política` = x2016.y, 
+         `Ideologia do Partido do Prefeito que Implementou a Política` = x2016.x)
+
+# cidade que a eleição do prefeito que implantou foi em 2020
+
+eleicao_2020 <- eleicoes_1 %>% filter(nome_munic == "Comendador Levy Gasparian" |
+                      nome_munic == "Artur Nogueira" |
+                      nome_munic == "Itarare" |
+                      nome_munic == "Assis" | 
+                      nome_munic == "Caete" | 
+                      nome_munic == "Caucaia" |
+                      nome_munic == "Claudio" |
+                      nome_munic == "Costa Rica" |
+                      nome_munic == "Formosa" | 
+                      nome_munic == "Goias" | 
+                      nome_munic == "Itapeva" |
+                      nome_munic == "Lagoa Da Prata" |
+                      nome_munic == "Santana Do Deserto" |
+                      nome_munic == "Sao Joaquim De Bicas" |
+                      nome_munic == "Sao Lourenco Da Serra" | 
+                      nome_munic == "Tangua" |
+                      nome_munic == "Arcos" |
+                      nome_munic == "Bombinhas" |
+                      nome_munic == "Guararema" |
+                      nome_munic == "Mariana" | 
+                      nome_munic == "Matinhos" |
+                      nome_munic == "Ouro Branco" |
+                      nome_munic == "Paranagua" |
+                      nome_munic == "Parobe" |
+                      nome_munic == "Quatro Barras" |
+                      nome_munic == "Rio Branco Do Sul" |
+                      nome_munic == "Sao Lourenco" |
+                      nome_munic == "Tambau" |
+                      nome_munic == "Tiete") %>% 
+  select(nome_munic, x2020.y, x2020.x) %>% 
+  rename(`Partido do Prefeito que Implementou a Política` = x2020.y, 
+         `Ideologia do Partido do Prefeito que Implementou a Política` = x2020.x)
+
+
+## Juntando as bases 
+
+bind_rows(eleicao_2000, eleicao_2004, eleicao_2008, eleicao_2012, eleicao_2016, eleicao_2020) %>%  arrange(nome_munic) %>% 
+  group_by(`Ideologia do Partido do Prefeito que Implementou a Política`) %>% 
+  tally() %>% 
+  mutate(pct = n/sum(n)) %>% 
+  select(-n) %>% 
+  adorn_pct_formatting(digits = 0) %>% 
+  kbl(col.names = c("Ideologia do Partido do Prefeito que Implementou a Política",  "Percentual"), caption = "Tabela 11: Variedade de Espectros Políicos") %>%
+  kable_classic(full_width = F , html_font = "Cambria") %>% 
+  footnote(general = "",
+           general_title = "Fonte: TSE ", number_title = "Type II: ",
+           footnote_as_chunk = T, title_format = c("italic"))
+
 
 
 ```
+
+
+
+
 
 **4° premissa** Quanto maior a competitividade das eleições anteriores a adoção da política maior a pressão do eleitor mediano por políticas sociais. Se essa premissa for verdadeira, esperamos encontrar menor diferença média na quantidade de votos recebidos pelo prefeito e o candidato em 2° lugar nas eleições anteriores à adoção da política nas cidades com tarifa zero 
 
@@ -679,7 +803,12 @@ eleicoes %>%
   group_by(tarifa_zero) %>% 
   mutate(tarifa_zero = case_when(tarifa_zero == "sim" ~ "sim", 
                                  TRUE ~ "nao")) %>% 
-  summarize(mediana = median(diferenca_votos, na.rm  = TRUE))
+  summarize(mediana = median(diferenca_votos, na.rm  = TRUE)) %>% 
+    kbl(col.names = c("A cidade tem tarifa zero?",  "Percentual"), caption = "Tabela 11: Competitividade das Eleições Anteriores a Adoção da Política") %>%
+  kable_classic(full_width = F , html_font = "Cambria") %>% 
+  footnote(general = "",
+           general_title = "Fonte: TSE ", number_title = "Type II: ",
+           footnote_as_chunk = T, title_format = c("italic"))
 
 ```
 
@@ -1025,18 +1154,17 @@ footnote(general = "IBGE, 2021 ",
 
 ```{r}
 
-difusao <- tibble(periodo=c("Anos 90", "Entre 2001 e 2009", "Entre 2001 e 2009", "Entre 2001 e 2009", "Entre 2010 e 2015", "Entre 2010 e 2015", "Entre 2010 e 2015", "Entre 2010 e 2015", "Entre 2016 e 2020", "Entre 2016 e 2020", "Entre 2016 e 2020", "Entre 2016 e 2020",  "Entre 2021 e 2022", "Entre 2021 e 2022", "Entre 2021 e 2022", "Entre 2021 e 2022"),
-       regiao=c("Sudeste", "Centro-Oeste", "Sudeste", "Sul", "Centro-Oeste", "Nordeste", "Sudeste", "Sul", "Nordeste", "Sudeste", "Sul", "Centro-Oeste", "Centro-Oeste", "Nordeste", "Sudeste", "Sul"),
-       n=c(3 ,1, 7, 3, 2, 1, 12, 4, 2, 21, 6, 2,  4, 3, 38, 11))
-
-difusao %>% 
-  mutate(periodo = factor(periodo, levels = c("Anos 90", 
+banco_completo %>% 
+  mutate(ano_implementacao_classe = factor(ano_implementacao_classe, levels = c("Anos 90", 
                                                                           "Entre 2001 e 2009", 
                                                                           "Entre 2010 e 2015", 
                                                                           "Entre 2016 e 2020",
                                                                           "Entre 2021 e 2022", ordered = T))) %>% 
-  ggplot() + 
-  geom_col(aes(x = periodo, y = n, fill = regiao), color = "darkgray") + 
+  filter(tarifa_zero == "sim") %>% 
+  group_by(ano_implementacao_classe, regiao) %>% 
+  tally() %>% 
+    ggplot() + 
+  geom_col(aes(x = ano_implementacao_classe, y = n, fill = regiao), color = "darkgray") + 
    theme_light() +
   ggtitle("Padrão de difusão da Tarifa Zero entre as regiões brasileiras") +
   xlab("") +
@@ -1044,7 +1172,7 @@ difusao %>%
   labs(caption = "Elaboração Própria") +
   scale_fill_manual(name = "Região:", values = c("#4b895a", "#b16673", "#4e8397", "#c57d4b"), labels = c("Centro-Oeste", "Nordeste", "Sudeste", "Sul")) + 
   theme_light() + 
-  geom_text(aes(x = periodo, y =n, label = n, group = regiao), size = 3, position = position_stack(vjust = 0.3)) +
+  geom_text(aes(x = ano_implementacao_classe, y =n, label = n, group = regiao), size = 3, position = position_stack(vjust = 0.3)) +
     theme(plot.title = element_text(family = "serif", size = 12, face = "bold", hjust = 0.5, colour = "black"),
           strip.background = element_rect(colour = "white", fill = "#579296"),
           plot.caption = element_text(family = "serif", size = 10),
@@ -1053,10 +1181,11 @@ difusao %>%
     axis.text.y= element_blank(),
     legend.position = "bottom")
 
-  
 
 
 ```
+
+
 
 **2° premissa:** Verificar se as cidades que implementaram primeiro são maiores do que aquelas que adotaram depois, dessa forma pode-se observar se houve imitação de cidades menores em relação às maiores
 
@@ -1065,21 +1194,21 @@ difusao %>%
 
 regiao_nordeste <- banco_completo %>% 
   filter(tarifa_zero == "sim") %>% 
-  select(regiao, ano_implementacao, populacao_estimada) %>% 
-  group_by(ano_implementacao, regiao, populacao_estimada) %>% 
+  select(regiao, ano_implementacao, populacao) %>% 
+  group_by(ano_implementacao, regiao, populacao) %>% 
   arrange(regiao) %>% 
   mutate(ano_implementacao = as.character(ano_implementacao)) %>% 
   ungroup() %>% 
   filter(regiao == " Nordeste") %>% 
   ggplot() + 
-  geom_point(aes(x = ano_implementacao, y = populacao_estimada), color = "#579296", size = 4) + 
-  geom_text_repel(aes(x = ano_implementacao, y = populacao_estimada, label = scales::dollar(prefix = " ", round(populacao_estimada, 1))), size = 3, hjust = 0.5, vjust = 1.5,point.padding = 0.5) +   
+  geom_point(aes(x = ano_implementacao, y = populacao), color = "#579296", size = 4) + 
+  geom_text_repel(aes(x = ano_implementacao, y = populacao, label = scales::dollar(prefix = " ", round(populacao, 1))), size = 3, hjust = 0.5, vjust = 1.5,point.padding = 0.5) +   
    theme_light() +
   ggtitle("Tamanho da população e ano de implementação de cada cidade 
           Região: Nordeste") +
   xlab("") +
   ylab("") +
-  labs(caption = "Fonte: IBGE, 2021 
+  labs(caption = "Fonte: Censo IBGE, 2022
                  Elaboração Própria") +
   theme_light() + 
     theme(plot.title = element_text(family = "serif", size = 12, face = "bold", hjust = 0.5, colour = "black"),
@@ -1102,15 +1231,15 @@ regiao_nordeste <- banco_completo %>%
 
 regiao_centro_oeste <- banco_completo %>% 
   filter(tarifa_zero == "sim") %>% 
-  select(regiao, ano_implementacao, populacao_estimada) %>% 
-  group_by(ano_implementacao, regiao, populacao_estimada) %>% 
+  select(regiao, ano_implementacao, populacao) %>% 
+  group_by(ano_implementacao, regiao, populacao) %>% 
   arrange(regiao) %>% 
   mutate(ano_implementacao = as.character(ano_implementacao)) %>% 
   ungroup() %>% 
   filter(regiao == " Centro-Oeste") %>% 
   ggplot() + 
-  geom_point(aes(x = ano_implementacao, y = populacao_estimada), color = "#579296", size = 4) + 
-  geom_text_repel(aes(x = ano_implementacao, y = populacao_estimada, label = scales::dollar(prefix = " ", round(populacao_estimada, 1))), size = 3, hjust = 0.5, vjust = 1.5,point.padding = 0.5) +
+  geom_point(aes(x = ano_implementacao, y = populacao), color = "#579296", size = 4) + 
+  geom_text_repel(aes(x = ano_implementacao, y = populacao, label = scales::dollar(prefix = " ", round(populacao, 1))), size = 3, hjust = 0.5, vjust = 1.5,point.padding = 0.5) +
   theme_light() +
   ggtitle("Região: Centro-Oeste") +
   xlab("") +
@@ -1136,21 +1265,21 @@ regiao_centro_oeste <- banco_completo %>%
 
 banco_completo %>% 
   filter(tarifa_zero == "sim") %>% 
-  select(regiao, ano_implementacao, populacao_estimada) %>% 
-  group_by(ano_implementacao, regiao, populacao_estimada) %>% 
+  select(regiao, ano_implementacao, populacao) %>% 
+  group_by(ano_implementacao, regiao, populacao) %>% 
   arrange(regiao) %>% 
   mutate(ano_implementacao = as.character(ano_implementacao)) %>% 
   ungroup() %>% 
   filter(regiao == " Sul") %>% 
   ggplot() + 
-  geom_point(aes(x = ano_implementacao, y = populacao_estimada), color = "#579296", size = 4) + 
-  geom_text_repel(aes(x = ano_implementacao, y = populacao_estimada, label = scales::dollar(prefix = " ", round(populacao_estimada, 1))), size = 3, hjust = 0.5, vjust = 1.5,point.padding = 0.5) +
+  geom_point(aes(x = ano_implementacao, y = populacao), color = "#579296", size = 4) + 
+  geom_text_repel(aes(x = ano_implementacao, y = populacao, label = scales::dollar(prefix = " ", round(populacao, 1))), size = 3, hjust = 0.5, vjust = 1.5,point.padding = 0.5) +
    theme_light() +
   ggtitle("Tamanho da população e ano de implementação de cada cidade 
           Região: Sul") +
   xlab("") +
   ylab("") +
-   labs(caption = "Fonte: IBGE, 2021 
+   labs(caption = "Fonte: Censo IBGE, 2022 
                    Elaboração Própria") +
   theme_light() + 
     theme(plot.title = element_text(family = "serif", size = 12, face = "bold", hjust = 0.5, colour = "black"),
@@ -1170,21 +1299,21 @@ banco_completo %>%
 
 regiao_sudeste <- banco_completo %>% 
   filter(tarifa_zero == "sim") %>% 
-  select(regiao, ano_implementacao, populacao_estimada) %>% 
-  group_by(ano_implementacao, regiao, populacao_estimada) %>% 
+  select(regiao, ano_implementacao, populacao) %>% 
+  group_by(ano_implementacao, regiao, populacao) %>% 
   arrange(regiao) %>% 
   mutate(ano_implementacao = as.character(ano_implementacao)) %>% 
   ungroup() %>% 
   filter(regiao == " Sudeste") %>% 
   ggplot() + 
-  geom_point(aes(x = ano_implementacao, y = populacao_estimada, size = populacao_estimada), color = "#579296", alpha = 0.7) + 
-  # geom_text_repel(aes(x = ano_implementacao, y = populacao_estimada, label = scales::dollar(prefix = " ", round(populacao_estimada, 1))), size = 3, hjust = 0.5, vjust = 1.5,point.padding = 0.5) + 
+  geom_point(aes(x = ano_implementacao, y = populacao, size = populacao), color = "#579296", alpha = 0.7) + 
+  # geom_text_repel(aes(x = ano_implementacao, y = populacao, label = scales::dollar(prefix = " ", round(populacao, 1))), size = 3, hjust = 0.5, vjust = 1.5,point.padding = 0.5) + 
    theme_light() +
   ggtitle("Tamanho da população e ano de implementação de cada cidade 
           Região: Sudeste") + 
   xlab("") +
   ylab("") +
-  labs(caption = "Fonte: IBGE, 2021 
+  labs(caption = "Fonte: Censo IBGE, 2022
                   Elaboração Própria") +
   theme_light() + 
     theme(plot.title = element_text(family = "serif", size = 12, face = "bold", hjust = 0.5, colour = "black"),
@@ -1221,20 +1350,20 @@ options(scipen = 999)
 
   banco_completo %>% 
   filter(tarifa_zero == "sim") %>% 
-  select(regiao, ano_implementacao, populacao_estimada) %>% 
-  group_by(ano_implementacao, regiao, populacao_estimada) %>% 
+  select(regiao, ano_implementacao, populacao) %>% 
+  group_by(ano_implementacao, regiao, populacao) %>% 
   arrange(regiao) %>% 
   mutate(ano_implementacao = as.character(ano_implementacao)) %>% 
   ungroup() %>% 
   rename(`Região:` = regiao) %>% 
   ggplot() + 
-  geom_point(aes(x = ano_implementacao, y = populacao_estimada, color = `Região:`), alpha = 0.5, size = 5) + 
+  geom_point(aes(x = ano_implementacao, y = populacao, color = `Região:`), alpha = 0.5, size = 5) + 
  theme_light() +
   ggtitle("Tamanho da população e ano de implementação de cada cidade 
           Todas as Regiões") +
   xlab("") +
   ylab("") +
-  labs(caption = "Fonte: IBGE, 2021 
+  labs(caption = "Fonte: Censo IBGE, 2022 
                  Elaboração Própria") +
   theme_light() + 
     theme(plot.title = element_text(family = "serif", size = 12, face = "bold", hjust = 0.5, colour = "black"),
@@ -1286,33 +1415,452 @@ banco_completo_1 %>%
     legend.position = "none") +
     labs(caption = "Fonte: Levantamento Colabarativo, 2022 
                      Elaboração Própria") +
-  annotate("label", x=2013, y=10, label="Jornadas de Junho de 2013",
+  annotate("label", x=2013, y=11, label="Jornadas de Junho de 2013",
   color="black", size=3) + 
   annotate(
-  "label", x=2020, y=10, label="Pandemia de Covid-19",
+  "label", x=2020, y=11, label="Pandemia de Covid-19",
   color="black", size=3)
 
 
 ```
 
+**2° premissa:**Verificar se houve uma mudança partidária nas eleições para prefeito anterior a adoção da política, e nas cidades em que houve essa mudança verificar se houve também mudança de expectro ideológico do partido - Mudanças no governo propiciam a adoção de novas políticas públicas
 
-```{r eval=FALSE, include=FALSE}
+
+```{r}
+
+# Criar tabelas com cidades de acordo com o ano da eleição anterior a adoção da Política: 
+
+# Cidades que implementaram em 2000 não será possível verificar pois não se obteve os dados das eleições de 1996 no site do TSE, o banco está incompleto :/
+
+# cidade que a eleição do prefeito que implantou foi em 2004
+
+eleicao_2004 <- eleicoes_1 %>% filter(nome_munic == "Aruana"|
+                                      nome_munic == "Holambra") %>% 
+  select(nome_munic, x2000.y, x2004.y, x2000.x, x2004.x) %>% 
+  rename(`Partido do Prefeito Anterior` = x2000.y, `Partido do Prefeito que Implementou a Política` = x2004.y,
+         `Ideologia do Partido do Prefeito Anterior` = x2000.x, `Ideologia do Partido do Prefeito que Implementou a Política` = x2004.x)
+
+# cidade que a eleição do prefeito que implantou foi em 2008
+
+eleicao_2008 <- eleicoes_1 %>% filter(nome_munic == "Wenceslau Braz" |
+                      nome_munic == "Holambra" |
+                      nome_munic == "Presidente Kennedy"|
+                      nome_munic == "Euzebio" | 
+                      nome_munic == "Muzambinho" | 
+                      nome_munic == "Pitanga" |
+                      nome_munic == "Ilha Solteira") %>% 
+  select(nome_munic, x2004.y, x2008.y, x2004.x, x2008.x) %>% 
+  rename(`Partido do Prefeito Anterior` =  x2004.y, `Partido do Prefeito que Implementou a Política` = x2008.y, 
+         `Ideologia do Partido do Prefeito Anterior` = x2004.x, `Ideologia do Partido do Prefeito que Implementou a Política` = x2008.x)
+
+# cidade que a eleição do prefeito que implantou foi em 2012
+
+eleicao_2012 <- eleicoes_1 %>% filter(
+                      nome_munic == "Silva Jardim" |
+                      nome_munic == "Dourado" | 
+                      nome_munic == "Marica" | 
+                      nome_munic == "Anicuns" |
+                      nome_munic == "Itatiaiucu") %>% 
+  select(nome_munic, x2008.y, x2012.y, x2008.x, x2012.x) %>% 
+  rename(`Partido do Prefeito Anterior` = x2008.y, `Partido do Prefeito que Implementou a Política` = x2012.y, 
+         `Ideologia do Partido do Prefeito Anterior` = x2008.x, `Ideologia do Partido do Prefeito que Implementou a Política` = x2012.x)
+
+# cidade que a eleição do prefeito que implantou foi em 2016
+
+eleicao_2016 <- eleicoes_1 %>% filter(nome_munic == "Ibaiti" |
+                      nome_munic == "Volta Redonda" |
+                      nome_munic == "Santa Rita Do Passa Quatro" |
+                      nome_munic == "Aquiraz" | 
+                      nome_munic == "Pedro Osorio" | 
+                      nome_munic == "Sao Joao Da Barra" |
+                      nome_munic == "Sao Jose Da Barra" |
+                      nome_munic == "Morungaba" |
+                      nome_munic == "Arceburgo" | 
+                      nome_munic == "Vargem Grande Paulista" | 
+                      nome_munic == "Campo Belo" |
+                      nome_munic == "Cerquilho" |
+                      nome_munic == "Pirapora Do Bom Jesus" |
+                      nome_munic == "Volta Redonda") %>% 
+  select(nome_munic, x2012.y, x2016.y, x2012.x, x2016.x) %>% 
+  rename(`Partido do Prefeito Anterior` = x2012.y, `Partido do Prefeito que Implementou a Política` = x2016.y, 
+         `Ideologia do Partido do Prefeito Anterior` = x2012.x, `Ideologia do Partido do Prefeito que Implementou a Política` = x2016.x)
+
+# cidade que a eleição do prefeito que implantou foi em 2020
+
+eleicao_2020 <- eleicoes_1 %>% filter(nome_munic == "Comendador Levy Gasparian" |
+                      nome_munic == "Artur Nogueira" |
+                      nome_munic == "Assis" | 
+                      nome_munic == "Itarare"
+                      nome_munic == "Caete" | 
+                      nome_munic == "Caucaia" |
+                      nome_munic == "Claudio" |
+                      nome_munic == "Costa Rica" |
+                      nome_munic == "Formosa" | 
+                      nome_munic == "Goias" | 
+                      nome_munic == "Itapeva" |
+                      nome_munic == "Lagoa Da Prata" |
+                      nome_munic == "Santana Do Deserto" |
+                      nome_munic == "Sao Joaquim De Bicas" |
+                      nome_munic == "Sao Lourenco Da Serra" | 
+                      nome_munic == "Tangua" |
+                      nome_munic == "Arcos" |
+                      nome_munic == "Bombinhas" |
+                      nome_munic == "Guararema" |
+                      nome_munic == "Mariana" | 
+                      nome_munic == "Matinhos" |
+                      nome_munic == "Ouro Branco" |
+                      nome_munic == "Paranagua" |
+                      nome_munic == "Parobe" |
+                      nome_munic == "Quatro Barras" |
+                      nome_munic == "Rio Branco Do Sul" |
+                      nome_munic == "Sao Lourenco" |
+                      nome_munic == "Tambau" |
+                      nome_munic == "Tiete") %>% 
+  select(nome_munic, x2016.y, x2020.y, x2016.x, x2020.x) %>% 
+  rename(`Partido do Prefeito Anterior` = x2016.y, `Partido do Prefeito que Implementou a Política` = x2020.y, 
+         `Ideologia do Partido do Prefeito Anterior` = x2016.x, `Ideologia do Partido do Prefeito que Implementou a Política` = x2020.x)
 
 
-eleicoes %>% distinct(ANO_ELEICAO)
+
+mudanca_partidaria <- bind_rows(eleicao_2004, eleicao_2008, eleicao_2012, eleicao_2016, eleicao_2020) %>%
+  select(nome_munic, `Partido do Prefeito Anterior`, `Partido do Prefeito que Implementou a Política`) %>% 
+  mutate(`Houve mudança Partidária?` = ifelse(`Partido do Prefeito Anterior` == `Partido do Prefeito que Implementou a Política`, "Não", "Sim")) %>% 
+  arrange(`Houve mudança Partidária?`)
+
+houve_mudança_partidaria <- mudanca_partidaria %>% 
+  filter(`Houve mudança Partidária?`== "Sim")
+
+mudanca_ideologica <- bind_rows(eleicao_2004, eleicao_2008, eleicao_2012, eleicao_2016, eleicao_2020) %>%
+  inner_join(houve_mudança_partidaria, by = "nome_munic") %>% 
+  select(nome_munic, `Ideologia do Partido do Prefeito Anterior`, `Ideologia do Partido do Prefeito que Implementou a Política`) %>% 
+  mutate(`Houve mudança ideológica?` = ifelse(`Ideologia do Partido do Prefeito Anterior` == `Ideologia do Partido do Prefeito que Implementou a Política`, "Não", "Sim")) %>% 
+  arrange(`Houve mudança ideológica?`)
+  
+
+```
+ 
+ 
+```{r}
+
+mudanca_partidaria %>% 
+  reactable(fullWidth = FALSE,
+      defaultPageSize = 7,
+      searchable = TRUE,
+      outlined = FALSE, 
+      showPageInfo = TRUE, 
+      showPageSizeOptions = TRUE,
+      defaultColDef = colDef(
+      align = "center",
+        headerStyle = list(background = "#E3B485")),
+      columns = list(
+      nome_munic = colDef("Nome do Município", minWidth = 100, align = "center"),
+      `Partido do Prefeito Anterior` = colDef("Partido do Prefeito Anterior", minWidth = 80, align = "center"),
+      `Partido do Prefeito que Implementou a Política` = colDef("Partido do Prefeito que Implementou a Política",  minWidth = 80, align = "center"),
+      `Houve mudança Partidária?` = colDef("Houve mudança Partidária?",  minWidth = 70, align = "center"),
+       pageSizeOptions = c(5,10,15,20,25,30), bordered = TRUE, striped = FALSE, highlight = TRUE))
+
+
+```
+ 
+ Tabela Resumindo se houve mudança partidária
+
+```{r}
+
+
+mudanca_partidaria %>% 
+  group_by(`Houve mudança Partidária?`) %>% 
+  tally() %>% 
+  mutate(pct = n/sum(n)) %>% 
+  select(-n) %>% 
+  adorn_pct_formatting(digits = 0) %>%
+  kbl(col.names = c("Houve mudança Partidária?", "Total Percentual"), caption = "Tabela 18: Mudança Partidária nos municípios que adotaram tarifa zero") %>%
+kable_classic(full_width = F , html_font = "Times New Roman") %>% 
+footnote(general = "TSE",
+           general_title = "Fonte: ", number_title = "Type I: ",
+           footnote_as_chunk = T, title_format = c("italic")
+           )
+  
+
+```
+
+Para as Cidades em que houve mudança partidária, houve mudança ideológica? 
+
+```{r}
+
+mudanca_ideologica %>% 
+  reactable(fullWidth = FALSE,
+      defaultPageSize = 7,
+      searchable = TRUE,
+      outlined = FALSE, 
+      showPageInfo = TRUE, 
+      showPageSizeOptions = TRUE,
+      defaultColDef = colDef(
+      align = "center",
+        headerStyle = list(background = "#E3B485")),
+      columns = list(
+      nome_munic = colDef("Nome do Município", minWidth = 100, align = "center"),
+      `Ideologia do Partido do Prefeito Anterior` = colDef("Partido do Prefeito Anterior", minWidth = 80, align = "center"),
+      `Ideologia do Partido do Prefeito que Implementou a Política` = colDef("Partido do Prefeito que Implementou a Política",  minWidth = 80, align = "center"),
+      `Houve mudança ideológica?` = colDef("Houve mudança Ideológica?",  minWidth = 70, align = "center"),
+       pageSizeOptions = c(5,10,15,20,25,30), bordered = TRUE, striped = FALSE, highlight = TRUE))
+
 
 
 ```
 
 
+```{r}
+
+mudanca_ideologica %>% 
+  group_by(`Houve mudança ideológica?`) %>% 
+  tally() %>% 
+  mutate(pct = n/sum(n)) %>% 
+  select(-n) %>% 
+  adorn_pct_formatting(digits = 0) %>%
+  kbl(col.names = c("Houve mudança Ideológica?", "Total Percentual"), caption = "Tabela 18: Mudança Ideológica nos municípios em que houve mudança partidária") %>%
+kable_classic(full_width = F , html_font = "Times New Roman") %>% 
+footnote(general = "TSE",
+           general_title = "Fonte: ", number_title = "Type I: ",
+           footnote_as_chunk = T, title_format = c("italic")
+           )
+
+
+```
+
+
+Das cidades que mudaram de partido e de espectro político, qual a proporção de cada direcionamento político? 
+
+
+```{r}
+
+
+dados_1 <- mudanca_ideologica %>% 
+  filter(`Houve mudança ideológica?` == "Sim") %>% 
+  group_by(`Ideologia do Partido do Prefeito Anterior`) %>% 
+  tally() %>% 
+  mutate(pct_anterior = n/sum(n)) %>% 
+  select(-n) %>% 
+  ungroup() %>% 
+  rename(`Espectro Político` = `Ideologia do Partido do Prefeito Anterior`) 
+
+dados_2 <- mudanca_ideologica %>% 
+  group_by(`Ideologia do Partido do Prefeito que Implementou a Política`) %>% 
+  tally() %>% 
+  mutate(pct_implementou = n/sum(n)) %>% 
+  select(-n)%>% 
+  ungroup() %>% 
+  rename(`Espectro Político` = `Ideologia do Partido do Prefeito que Implementou a Política`) 
+ 
+
+dados_1 %>% left_join(dados_2, by = c("Espectro Político")) %>% 
+    mutate(`Espectro Político` = factor(`Espectro Político`, levels = c("Direita", 
+                                                    "Extrema Direita", 
+                                                    "Centro Direita",
+                                                    "Centro",
+                                                    "Centro Esquerda", 
+                                                    "Esquerda", 
+                                                     ordered = TRUE))) %>% 
+  adorn_pct_formatting(digits = 0) %>%
+  kbl(col.names = c("Espectro Ideológico", "Percentual Governo Anterior", "Percentual Governo que Implementou"), caption = "Tabela 19: Mudança Ideológica nos municípios em que houve mudança partidária") %>%
+kable_classic(full_width = F , html_font = "Times New Roman") %>% 
+footnote(general = "TSE",
+           general_title = "Fonte: ", number_title = "Type I: ",
+           footnote_as_chunk = T, title_format = c("italic"))
+
+
+```
+
+
+Das cidades que mudaram de partido e de espectro político, govern mudou a proporção de cada espectro político dentro do governo? 
 
 
 
+```{r}
 
 
 
+mudanca_ideologica %>% 
+  filter(`Houve mudança ideológica?` == "Sim") %>% 
+  pivot_longer(cols = c("Ideologia do Partido do Prefeito Anterior", "Ideologia do Partido do Prefeito que Implementou a Política")) %>% 
+  group_by(name, value) %>% 
+  tally() %>% 
+  ungroup() %>% 
+  group_by(value) %>% 
+  mutate(pct = n/sum(n)) %>% 
+  ungroup() %>% 
+  mutate(value = factor(value, levels = c("Centro Esquerda", 
+                                          "Direita", 
+                                                    "Esquerda", 
+                                                    "Centro Direita",
+                                                    "Extrema Direita",
+                                                    "Centro", 
+                                                     ordered = TRUE))) %>%
+  ggplot() + 
+  geom_col(aes(x = value, y = pct, fill = name)) + 
+  theme_minimal() + 
+  xlab("") +
+  ylab("") +
+  ggtitle("Das cidades que mudaram de partido e de espectro político, como mudou a proporção de cada 
+           espectro político dentro do governo?") +
+  geom_label(aes(x = value, y = pct, group = name, label = scales::percent(pct, accuracy = 2)), 
+             position = position_fill(), family = "serif", size = 4, colour = "black", fill = "Beige", vjust  = 2) +
+   labs(caption = "Fonte: TSE, 
+                   Elaboração Própria") +
+  scale_fill_manual(name = "", values = c("#c57d4b", "#7e9563"), labels = c("Partido do Prefeito Anterior", "Partido do Prefeito que Implementou a Política")) + 
+  theme_light() + 
+    theme(plot.title = element_text(family = "serif", size = 12, face = "bold", hjust = 0.5, colour = "black"),
+          text = element_text(family = "serif", size = 12),
+    axis.text.y=element_blank(),
+    axis.text.x=element_text(size = 11, family = "serif"),
+    legend.position = "bottom")
 
 
+
+  
+
+
+```
+
+
+## 3.Análise da Teoria da Política Partidária
+
+**1° premissa:**Partidos de esquerda adotam mais políticas redistributivas e aumentam o gasto público. Se essa premissa for verdadeira e nos ajuda a explicar a adoção da tarifa zero, uma quantidade relevante de cidades terão implementado a política com governos de esquerda e centro esquerda no poder. 
+
+Análise para os dados de ideologia partidária após o resultado das eleições municipais de 2020
+
+
+```{r}
+
+tf <- eleicoes_2 %>% 
+  filter(ANO_ELEICAO == 2020 & tarifa_zero == "sim") %>% 
+  group_by(ideologia_dos_partidos) %>% 
+  tally() %>% 
+  mutate(pct = n/sum(n)) %>% 
+  rename(`cidades com tarifa zero` = pct) %>% 
+  select(-n) %>% 
+  adorn_pct_formatting(digits = 0) 
+
+eleicoes_2 %>% 
+  filter(ANO_ELEICAO == 2020 & tarifa_zero == "não") %>% 
+  group_by(ideologia_dos_partidos) %>% 
+  tally() %>% 
+  mutate(pct = n/sum(n)) %>% 
+  rename(`cidades sem tarifa zero` = pct) %>% 
+  select(-n) %>% 
+  adorn_pct_formatting(digits = 1) %>% 
+  left_join(tf, by = "ideologia_dos_partidos")
+  
+
+
+
+```
+
+Análise para os dados de ideologia partidária após o resultado das eleições municipais de 2016
+
+```{r}
+
+tf <- eleicoes_2 %>% 
+  filter(ANO_ELEICAO == 2016 & tarifa_zero == "sim") %>% 
+  group_by(ideologia_dos_partidos) %>% 
+  tally() %>% 
+  mutate(pct = n/sum(n)) %>% 
+  rename(`cidades com tarifa zero` = pct) %>% 
+  select(-n) %>% 
+  adorn_pct_formatting(digits = 1) 
+
+eleicoes_2 %>% 
+  filter(ANO_ELEICAO == 2016 & tarifa_zero == "não") %>% 
+  group_by(ideologia_dos_partidos) %>% 
+  tally() %>% 
+  mutate(pct = n/sum(n)) %>% 
+  rename(`cidades sem tarifa zero` = pct) %>% 
+  select(-n) %>% 
+  adorn_pct_formatting(digits = 1) %>% 
+  left_join(tf, by = "ideologia_dos_partidos")
+  
+
+
+
+```
+
+Dados Agregados 2016 
+
+```{r}
+
+tf <- eleicoes_2 %>% 
+  filter(ANO_ELEICAO == 2016 & tarifa_zero == "sim") %>% 
+  mutate(dado_agregado = case_when(ideologia_dos_partidos == "Direita" ~ "Direita", 
+                                   ideologia_dos_partidos == "Centro Direita" ~ "Direita", 
+                                   ideologia_dos_partidos == "Extrema Direita" ~ "Direita", 
+                                   ideologia_dos_partidos == "Esquerda" ~ "Esquerda", 
+                                   ideologia_dos_partidos == "Centro Esquerda" ~ "Esquerda", 
+                                   ideologia_dos_partidos == "Extrema Esquerda" ~ "Esquerda", 
+                                   ideologia_dos_partidos == "Centro" ~ "Centro", TRUE ~ ideologia_dos_partidos)) %>%   
+  group_by(dado_agregado) %>% 
+  tally() %>% 
+  mutate(pct = n/sum(n)) %>% 
+  rename(`cidades com tarifa zero` = pct) %>% 
+  select(-n) %>% 
+  adorn_pct_formatting(digits = 1) 
+  
+eleicoes_2 %>% 
+  filter(ANO_ELEICAO == 2016 & tarifa_zero == "não") %>% 
+  mutate(dado_agregado = case_when(ideologia_dos_partidos == "Direita" ~ "Direita", 
+                                   ideologia_dos_partidos == "Centro Direita" ~ "Direita", 
+                                   ideologia_dos_partidos == "Extrema Direita" ~ "Direita", 
+                                   ideologia_dos_partidos == "Esquerda" ~ "Esquerda", 
+                                   ideologia_dos_partidos == "Centro Esquerda" ~ "Esquerda", 
+                                   ideologia_dos_partidos == "Extrema Esquerda" ~ "Esquerda", 
+                                   ideologia_dos_partidos == "Centro" ~ "Centro", TRUE ~ ideologia_dos_partidos)) %>%  
+  group_by(dado_agregado) %>% 
+  tally() %>% 
+  mutate(pct = n/sum(n)) %>% 
+  rename(`cidades sem tarifa zero` = pct) %>% 
+  select(-n) %>% 
+  adorn_pct_formatting(digits = 1) %>% 
+  left_join(tf, by = "dado_agregado")
+
+```
+
+Dados Agregados 2020
+
+```{r}
+
+tf <- eleicoes_2 %>% 
+  filter(ANO_ELEICAO == 2020 & tarifa_zero == "sim") %>% 
+  mutate(dado_agregado = case_when(ideologia_dos_partidos == "Direita" ~ "Direita", 
+                                   ideologia_dos_partidos == "Centro Direita" ~ "Direita", 
+                                   ideologia_dos_partidos == "Extrema Direita" ~ "Direita", 
+                                   ideologia_dos_partidos == "Esquerda" ~ "Esquerda", 
+                                   ideologia_dos_partidos == "Centro Esquerda" ~ "Esquerda", 
+                                   ideologia_dos_partidos == "Extrema Esquerda" ~ "Esquerda", 
+                                   ideologia_dos_partidos == "Centro" ~ "Centro", TRUE ~ ideologia_dos_partidos)) %>%   
+  group_by(dado_agregado) %>% 
+  tally() %>% 
+  mutate(pct = n/sum(n)) %>% 
+  rename(`cidades com tarifa zero` = pct) %>% 
+  select(-n) %>% 
+  adorn_pct_formatting(digits = 1) 
+  
+eleicoes_2 %>% 
+  filter(ANO_ELEICAO == 2020 & tarifa_zero == "não") %>% 
+  mutate(dado_agregado = case_when(ideologia_dos_partidos == "Direita" ~ "Direita", 
+                                   ideologia_dos_partidos == "Centro Direita" ~ "Direita", 
+                                   ideologia_dos_partidos == "Extrema Direita" ~ "Direita", 
+                                   ideologia_dos_partidos == "Esquerda" ~ "Esquerda", 
+                                   ideologia_dos_partidos == "Centro Esquerda" ~ "Esquerda", 
+                                   ideologia_dos_partidos == "Extrema Esquerda" ~ "Esquerda", 
+                                   ideologia_dos_partidos == "Centro" ~ "Centro", TRUE ~ ideologia_dos_partidos)) %>%  
+  group_by(dado_agregado) %>% 
+  tally() %>% 
+  mutate(pct = n/sum(n)) %>% 
+  rename(`cidades sem tarifa zero` = pct) %>% 
+  select(-n) %>% 
+  adorn_pct_formatting(digits = 1) %>% 
+  left_join(tf, by = "dado_agregado")
+
+```
 
 
 
