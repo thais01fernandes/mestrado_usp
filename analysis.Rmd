@@ -1916,10 +1916,33 @@ banco_completo %>% select(cod_munic,
     mutate(fundo_municipal_de_transporte_existencia = case_when(
     fundo_municipal_de_transporte_existencia == "Sim" ~ 1,
     fundo_municipal_de_transporte_existencia %in% c("Recusa", "Nao informou", "Não") ~ 0,
-    TRUE ~ as.numeric(fundo_municipal_de_transporte_existencia))) 
+    TRUE ~ as.numeric(fundo_municipal_de_transporte_existencia))) %>% 
+    mutate(escolaridade_do_a_titular_do_orgao_gestor_2 = case_when(
+    escolaridade_do_a_titular_do_orgao_gestor %in% c("Ensino superior completo", "Mestrado", "Especialização") ~ 1,
+    escolaridade_do_a_titular_do_orgao_gestor %in% c("-", "Recusa", "Ensino médio (2º Grau) completo", "Ensino superior incompleto", "Ensino fundamental (1º Grau) incompleto","Ensino médio (2º Grau) incompleto", "Ensino fundamental (1º Grau) completo", "Não informou", "Doutorado", "Sem titular") ~ 0,
+    TRUE ~ as.numeric(escolaridade_do_a_titular_do_orgao_gestor))) %>% 
+     pivot_wider(names_from = escolaridade_do_a_titular_do_orgao_gestor, values_from = escolaridade_do_a_titular_do_orgao_gestor_2) %>% 
+     mutate(prosperidade_social_2= case_when(
+     prosperidade_social %in% c("Muito Alto", "Alto") ~ 1,
+     prosperidade_social %in% c("Médio", "Baixo", "Muito Baixo") ~ 0, 
+     TRUE ~ as.numeric(prosperidade_social))) %>% 
+   pivot_wider(names_from = prosperidade_social, values_from = prosperidade_social_2) %>% 
+   select(2,4,5,6, 7, 8,11, 12, 13, 17, 20, 23,28,29) %>% 
+   mutate(`Ensino superior completo` = replace_na(`Ensino superior completo`, 0)) %>% 
+   mutate(Mestrado = replace_na(Mestrado, 0)) %>% 
+   mutate(`Muito Alto` = replace_na(Especialização, 0)) %>% 
+   mutate(Alto = replace_na(Alto, 0)) %>% 
+   mutate(Especialização = replace_na(Especialização, 0)) %>% 
+  rename(plano_municipal_de_transporte = plano_municipal_de_transporte_existencia, 
+         plano_de_mobilidade_urbana = possui_plano_de_mobilidade_urbana, 
+         conselho_municipal_de_transporte = conselho_municipal_de_transporte_existencia, 
+         fundo_municipal_de_transporte = fundo_municipal_de_transporte_existencia, 
+         Ensino_superior_completo =  `Ensino superior completo`, 
+         Especializacao = Especialização,
+         prosperidade_muito_alta = `Muito Alto`,
+         prosperidade_alta = Alto) %>%  View()
   
-banco_completo %>% distinct(escolaridade_do_a_titular_do_orgao_gestor)
-  
+
 ```
 
 
