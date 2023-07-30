@@ -1864,6 +1864,63 @@ eleicoes_2 %>%
 
 
 
+```{r}
+
+# Função para normalização pela escala logarítmica
+normalize_log_scale <- function(x) {
+  return(log(x) / log(max(x)))
+}
+
+banco_completo %>% select(cod_munic,
+                          tarifa_zero,
+                          populacao, 
+                          caracterizacao_do_orgao_gestor,
+                          escolaridade_do_a_titular_do_orgao_gestor, 
+                          plano_municipal_de_transporte_existencia, 
+                          possui_plano_de_mobilidade_urbana, 
+                          conselho_municipal_de_transporte_existencia, 
+                          fundo_municipal_de_transporte_existencia,
+                          prosperidade_social, 
+                          produto_interno_bruto_a_precos_correntes_r_1_000,
+                          Estatutarios) %>% 
+  rename(pib = produto_interno_bruto_a_precos_correntes_r_1_000) %>% 
+  mutate(pib = round(pib)) %>% 
+  mutate(pib_normalizado = normalize_log_scale(pib)) %>% 
+  mutate(populacao_normalizado = normalize_log_scale(populacao)) %>% 
+  replace(is.na("Estatutarios"), 0) %>% 
+  filter(!is.na(Estatutarios)) %>% 
+  mutate(estatutarios_normalizado = normalize_log_scale(Estatutarios)) %>% 
+  rename(secretaria_exclusiva = caracterizacao_do_orgao_gestor) %>% 
+  mutate(secretaria_exclusiva = case_when(secretaria_exclusiva %in% c("Não informou", "Não possui estrutura", "Recusa",
+                               "Órgão da administração indireta", 
+                               "Secretaria em conjunto com outras políticas setoriais",
+                               "Setor subordinado a outra secretaria",
+                               "Setor subordinado diretamente à chefia do Executivo") ~ 0,
+    secretaria_exclusiva == "Secretaria exclusiva" ~ 1,
+    TRUE ~ as.numeric(secretaria_exclusiva))) %>%
+    mutate(tarifa_zero = case_when(tarifa_zero == "sim" ~ 1,
+                                   tarifa_zero == "não" ~ 0,
+    TRUE ~ as.numeric(tarifa_zero))) %>% 
+   mutate(possui_plano_de_mobilidade_urbana = case_when(
+    possui_plano_de_mobilidade_urbana %in% c("SIM", "Sim") ~ 1,
+    possui_plano_de_mobilidade_urbana %in% c("Nao foi enviado oficio", "Nao respondeu", "Nao") ~ 0,
+    TRUE ~ as.numeric(possui_plano_de_mobilidade_urbana))) %>% 
+    mutate(plano_municipal_de_transporte_existencia = case_when(
+    plano_municipal_de_transporte_existencia == "Sim" ~ 1,
+    plano_municipal_de_transporte_existencia %in% c("Recusa", "Nao informou", "Não") ~ 0,
+    TRUE ~ as.numeric(possui_plano_de_mobilidade_urbana))) %>% 
+    mutate(conselho_municipal_de_transporte_existencia = case_when(
+    conselho_municipal_de_transporte_existencia == "Sim" ~ 1,
+    conselho_municipal_de_transporte_existencia %in% c("Recusa", "Nao informou", "Não") ~ 0,
+    TRUE ~ as.numeric(conselho_municipal_de_transporte_existencia))) %>% 
+    mutate(fundo_municipal_de_transporte_existencia = case_when(
+    fundo_municipal_de_transporte_existencia == "Sim" ~ 1,
+    fundo_municipal_de_transporte_existencia %in% c("Recusa", "Nao informou", "Não") ~ 0,
+    TRUE ~ as.numeric(fundo_municipal_de_transporte_existencia))) 
+  
+banco_completo %>% distinct(escolaridade_do_a_titular_do_orgao_gestor)
+  
+```
 
 
 
