@@ -58,8 +58,9 @@ library('rmdformats')
 library("janitor")
 library("reactablefmtr")
 # install.packages("PNADcIBGE")
-library(PNADcIBGE)
-
+library("PNADcIBGE")
+library("corrplot")
+library("heatmap")
 
 ```
 
@@ -1871,7 +1872,7 @@ normalize_log_scale <- function(x) {
   return(log(x) / log(max(x)))
 }
 
-banco_completo %>% select(cod_munic,
+dados_normalizados <- banco_completo %>% select(cod_munic,
                           tarifa_zero,
                           populacao, 
                           caracterizacao_do_orgao_gestor,
@@ -1933,17 +1934,92 @@ banco_completo %>% select(cod_munic,
    mutate(`Muito Alto` = replace_na(Especialização, 0)) %>% 
    mutate(Alto = replace_na(Alto, 0)) %>% 
    mutate(Especialização = replace_na(Especialização, 0)) %>% 
-  rename(plano_municipal_de_transporte = plano_municipal_de_transporte_existencia, 
-         plano_de_mobilidade_urbana = possui_plano_de_mobilidade_urbana, 
-         conselho_municipal_de_transporte = conselho_municipal_de_transporte_existencia, 
-         fundo_municipal_de_transporte = fundo_municipal_de_transporte_existencia, 
-         Ensino_superior_completo =  `Ensino superior completo`, 
+   mutate(conselho_municipal_de_transporte_existencia = replace_na(conselho_municipal_de_transporte_existencia, 0)) %>% 
+   mutate(fundo_municipal_de_transporte_existencia = replace_na(fundo_municipal_de_transporte_existencia, 0)) %>% 
+   rename(plano_transporte = plano_municipal_de_transporte_existencia, 
+         plano_mobilidade = possui_plano_de_mobilidade_urbana, 
+         conselho_transp = conselho_municipal_de_transporte_existencia, 
+         fundo_transp = fundo_municipal_de_transporte_existencia, 
+         Ensino_superior =  `Ensino superior completo`, 
          Especializacao = Especialização,
-         prosperidade_muito_alta = `Muito Alto`,
-         prosperidade_alta = Alto) %>%  View()
+         prosp_muito_alta = `Muito Alto`,
+         prosp_alta = Alto, 
+         pib = pib_normalizado,
+         populacao = populacao_normalizado,
+         qt_concursados = estatutarios_normalizado, 
+         secretaria_excl = secretaria_exclusiva) %>% 
+  mutate(qt_concursados = replace( qt_concursados, is.infinite(qt_concursados), 0))
   
 
 ```
+
+
+```{r}
+
+dados_normalizados %>% 
+  pivot_longer(cols = c("pib_normalizado", "populacao_normalizado", "estatutarios_normalizado")) %>% 
+  ggplot() + 
+  geom_boxplot(aes(x = name, y = value, fill = name), colour="black", alpha = 0.9) +
+  theme_light() +
+  ggtitle("") +
+  xlab("") +
+  ylab("")
+ 
+
+
+```
+
+
+```{r}
+
+
+# Calcular a matriz de correlação
+
+matriz_correlacao <- cor(dados_normalizados)
+
+ggplot(data = as.data.frame(as.table(matriz_correlacao)), aes(Var1, Var2, fill = Freq)) +
+  geom_tile() +
+  scale_fill_gradient(low ="#faccff"  , high = "#250b65") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+  xlab("") +
+  ylab("")
+
+```
+
+
+
+```{r}
+
+dados_normalizados %>% 
+  cor() %>% 
+corrplot(method = "square")
+
+
+```
+
+```{r}
+
+dados_normalizados %>%
+  ggplot(aes(x = prosp_muito_alta, y = Especializacao))+
+  geom_point(col = 'darkblue')+
+  geom_smooth(method = 'lm', se = F, col = 'red')+
+  theme_bw()+
+  labs(title = 'Correlação entre Prosperidade Alta da Cidade e Especialização 
+       dos Gestores de Política Urbana')
+```
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
