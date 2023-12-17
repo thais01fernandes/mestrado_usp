@@ -63,6 +63,10 @@ Fernandes Pereira, T. (2022). A Política de Insenção de Tarifa no Transporte 
 Fernandes Pereira, T., Vermander, M., & Kębłowski, W. (2023). Motivations and characteristics of FFPT policies in selected Brazilian municipalities. Journal of Sustainable Urban Mobility, 3(1), 122–138. https://doi.org/10.53613/josum.2023.v3.010 
 
 
+3. **Trabalho preparado para apresentação no XIII Seminário Discente da Pós Graduação em Ciência Política da USP, de 25 a 29 de setembro de 2023:**
+
+Fernandes Pereira, T. (2022). As capacidades estatais das cidades brasileiras co Tarifa Zero no Transporte Público. XIII Seminário Discente da Pós Graduação em Ciência Política da USP, São Paulo. [https://sdpscp.fflch.usp.br/sites/sdpscp.fflch.usp.br/files/inline-files/Thais%20Fernandes.pdf](https://sdpscp.fflch.usp.br/sites/sdpscp.fflch.usp.br/files/inline-files/MESA05%20-%20Thais%20Fernandes.pdf)https://sdpscp.fflch.usp.br/sites/sdpscp.fflch.usp.br/files/inline-files/MESA05%20-%20Thais%20Fernandes.pdf
+
 
 
 
