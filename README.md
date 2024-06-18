@@ -68,8 +68,15 @@ Fernandes Pereira, T., Vermander, M., & Kębłowski, W. (2023). Motivations and 
 Fernandes Pereira, T. (2022). As capacidades estatais das cidades brasileiras co Tarifa Zero no Transporte Público. XIII Seminário Discente da Pós Graduação em Ciência Política da USP, São Paulo. [https://sdpscp.fflch.usp.br/sites/sdpscp.fflch.usp.br/files/inline-files/Thais%20Fernandes.pdf](https://sdpscp.fflch.usp.br/sites/sdpscp.fflch.usp.br/files/inline-files/MESA05%20-%20Thais%20Fernandes.pdf)https://sdpscp.fflch.usp.br/sites/sdpscp.fflch.usp.br/files/inline-files/MESA05%20-%20Thais%20Fernandes.pdf
 
 
+## Premiação 
 
+Melhor Artigo do XIII Seminário Discente da Pós Graduação em Ciência Política da USP
 
+1° Lugar na modalidade - “Trabalho de Políticas Públicas”
+
+Título - “As capacidades estatais das cidades brasileiras com Tarifa Zero no Transporte Público”.
+
+![image](https://github.com/thais01fernandes/mestrado_usp/assets/84215853/c4494124-1b08-438e-8f35-470ca08cf5ea)
 
 
 
